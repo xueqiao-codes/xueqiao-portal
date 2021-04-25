@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易时间管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+<style type="text/css">
+.select_area_item {
+	height: 236px;
+}
+.select_area_item_title {
+	height: 36px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	font-size: 16px;
+	color: #303030;
+}
+.select_area_sub_item {
+	height: 200px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    overflow: auto;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.select_area_sub_item2 {
+    height: 200px;
+    width: 500px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    overflow: auto;
+
+}
+.select_area_sub_item2_sub {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.right {
+	float: right;
+}
+.input_frame {
+	color: #303030;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+	padding: 2px 10px;
+	background: white;
+	height: 24px;
+	width: 100px;
+}
+</style>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">交易时间管理</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode">
+				<#if moduleEditable == 1>
+					<a href="javascript:unlockModule();">退出编辑状态并同步</a>
+				<#elseif moduleEditable == 2>
+					<span>${lockModule!""}模块在编辑中</span>
+				<#elseif moduleEditable == 3>
+					<span>${lockUserName}在编辑${lockModule!""}模块</span>
+				<#else>
+					<a href="javascript:lockModule();">进入编辑状态</a>
+				</#if>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>交易时间管理</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<a href="${base_url}/SledTradeTimeAdmin/show"><span class="tab_inactive"><b>交易时间</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<span class="tab_active"><b>夏令时切换规则</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/SledSpecTradeTimeAdmin/show"><span class="tab_inactive"><b>特殊时间</b></span></a>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">交易所：<input type=text id="exchangeMic" class="input_conponent" style="width: 150px" /></span>&nbsp;
+					<span>商品类型：</span>
+					<select id="sledCommodityType" name="sledCommodityType" class="input_conponent" style="width: 150px">
+						<option value=""></option>
+						<option value="FUTURES">FUTURES</option>
+						<option value="OPTION">OPTION</option>
+						<option value="SPOT">SPOT</option>
+						<option value="SPREAD_MONTH">SPREAD_MONTH</option>
+						<option value="SPREAD_COMMODITY">SPREAD_COMMODITY</option>
+						<option value="BUL">BUL</option>
+						<option value="BER">BER</option>
+						<option value="STD">STD</option>
+						<option value="STG">STG</option>
+						<option value="PRT">PRT</option>
+						<option value="DIRECTFOREX">DIRECTFOREX</option>
+						<option value="INDIRECTFOREX">INDIRECTFOREX</option>
+						<option value="CROSSFOREX">CROSSFOREX</option>
+						<option value="INDEX">INDEX</option>
+						<option value="STOCK">STOCK</option>
+					</select>&nbsp;
+					<span>商品中文名：<input type=text id="commodityCnName" class="input_conponent" style="width: 150px" /></span>&nbsp;
+					<button id="submit_option_button" class="sled_btn_enable">查询</button>
+				
+					<div class="sled_align_rifht general_margin_right">
+						<#if moduleEditable == 1>
+							<button id="btn-dst-transfer-config" class="sled_btn_enable">添加</button>
+						<#else>
+							<button id="btn-dst-transfer-config" class="sled_btn_disable" disabled="disabled">添加</button>
+						</#if>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="50">交易所</th>
+							<th class="table_nav_key" width="50">商品类型</th>
+							<th class="table_nav_key" width="50">商品</th>
+							<th class="table_nav_key" width="100">夏令时规则</th>
+							<th class="table_nav_key" width="50">删除</th>
+						</tr>
+						<#if dstTransferConfigList??>
+							<#list dstTransferConfigList as dstTransferConfig>
+								<tr>
+									<td align="center">${dstTransferConfig.exchangeMic!""}</td>
+									<td align="center">${dstTransferConfig.sledCommodityType!""}</td>
+									<td align="center">
+										<#if dstTransferConfig.sledCommodityNames??>
+											<#list dstTransferConfig.sledCommodityNames as sledCommodityName>
+												${sledCommodityName!""}、
+											</#list>
+										</#if>
+									</td>
+									<td align="center">${dstTransferConfig.standard2DstOffSetMinuteStr!""}</td>
+									<#if moduleEditable == 1>
+										<td align="center"><a href="javascript:showDeleteDstTransferConfigDialog(${dstTransferConfig.dstTransferConfigId?c});"><img src="${static_url}/img/icon_delete.png"/></a></td>
+									<#else>
+										<td align="center"><img src="${static_url}/img/icon_delete_disabled.png"/></td>
+									</#if>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+
+	<!-- dialog -->
+	<div id="add_dst_transfer_config_dialog">
+		<div class="flex_row">
+			<div class="select_area_item">
+				<div><span class="select_area_item_title">商品类型</span></div>
+				<div id="commodity_type_list" class="select_area_sub_item" style="width: 90px">
+					<input type="radio" checked="checked" name="commodityType" onclick='onSelectionItemClick(event)' value="FUTURES" /><span style="width: 50px">期货</span><br>
+					<input type="radio" name="commodityType" onclick='onSelectionItemClick(event)' value="SPREAD_MONTH" /><span style="width: 50px">跨期</span><br>
+					<input type="radio" name="commodityType" onclick='onSelectionItemClick(event)' value="SPREAD_COMMODITY" /><span style="width: 50px">跨品种</span><br>
+				</div>
+			</div>
+			<div class="select_area_item">
+				<div><span class="select_area_item_title">交易所</span></div>
+				<div id="exchange_list" class="select_area_sub_item" style="width: 180px">
+					<span style="width: 120px">交易所1</span><input class="right" type="radio" checked="checked" name="exchangeMic"/><br>
+				</div>
+			</div>
+			<div class="select_area_item">
+				<div>
+					<span class="select_area_item_title">商品</span>
+					<span class='right'>全选</span>&nbsp;
+					<input class='right' type='checkbox' id="sledCommodityAllSelect" name='sledCommodityAllSelect' onclick='onCommodityAllSelect(event)'/>&nbsp;
+				</div>
+				<div id="commodity_list" class="col-md-12 select_area_sub_item2" style="width: 522px">
+					<div class="col-md-4 select_area_sub_item2_sub">
+						<span style="width: 120px">AAAA</span><input class="right" type="checkbox" name="time"/>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div style="margin-left: 20px; margin-top: 10px;">
+			<span>冬转夏规则 ：</span>&nbsp;&nbsp;
+			<span>所有时间&nbsp;提前</span>
+			<input class="input_frame" type="text" name="standard2DstOffSetMinute" id="standard2DstOffSetMinute" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+			<span>分钟</span>
+		</div>
+	</div>
+
+	<script>
+	
+	$("#add_dst_transfer_config_dialog").dialog({
+		autoOpen : false,
+		height : 400,
+		width : 900,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				// exchange
+				var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+				var exchangeMic = groupExchangeMic.attr("value");
+				
+				// commodity type
+				var groupCommodityType = $("[name='commodityType']").filter(":checked");
+				var commodityType = groupCommodityType.attr("value");
+				
+				// commodity list
+				var groupCommodity = $("[name='sledCommodityIds']").filter(":checked");
+				
+				// standard2DstOffSetMinute
+				var standard2DstOffSetMinute = $("#standard2DstOffSetMinute").val();
+				
+				if (exchangeMic == null || exchangeMic == undefined || exchangeMic == '') {
+					alert('获取不到交易所信息，请检查后再提交');
+					return;
+				}
+				if (commodityType == null || commodityType == undefined || commodityType == '') {
+					alert('获取不到商品类型信息，请检查后再提交');
+					return;
+				}
+				if (groupCommodity.length < 1) {
+					alert('请选择至少一个商品');
+					return;
+				}
+				if (standard2DstOffSetMinute == null || standard2DstOffSetMinute == undefined || standard2DstOffSetMinute == '') {
+					alert('请填写冬转夏偏移时间');
+					return;
+				}
+				
+				addDstTransferConfig();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#submit_option_button").click(function() {
+		var exchangeMic = $.trim($("#exchangeMic").val());
+		var sledCommodityType = $.trim($("#sledCommodityType").val());
+		var commodityCnName = $.trim($("#commodityCnName").val());
+		
+		var queryUrl = "${base_url}/SledDstSwitchRuleAdmin/show?exchangeMic=" + exchangeMic
+			+ "&sledCommodityType=" + sledCommodityType
+			+ "&commodityCnName=" + commodityCnName;
+		window.location.href = queryUrl;
+	});
+	
+	$("#btn-dst-transfer-config").click(function( event ) {
+		$("#add_dst_transfer_config_dialog").dialog("option", "title", "添加冬夏令时切换规则");
+		$("#add_dst_transfer_config_dialog").dialog("open");
+		
+		getDstTransferConfigSelectionInfo("", "");
+	});
+	
+	function onSelectionItemClick(event) {
+		var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+		var exchangeMic = groupExchangeMic.attr("value");
+		
+		var groupCommodityType = $("[name='commodityType']").filter(":checked");
+		var commodityType = groupCommodityType.attr("value");
+		
+		getDstTransferConfigSelectionInfo(exchangeMic, commodityType);
+	}
+	
+	function onCommodityAllSelect(event) {
+		var isCheck=$("#sledCommodityAllSelect").is(':checked');
+		$("[name='sledCommodityIds']").each(function() {  
+			this.checked = isCheck;
+		});
+	}
+	
+	function getDstTransferConfigSelectionInfo(exchangeMic, sledCommodityType) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledDstSwitchRuleAdmin/getDstTransferConfigSelectionInfo",
+			data : {
+				exchangeMic : exchangeMic,
+				sledCommodityType : sledCommodityType,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				refreshaddDstTransferConfigDialogContent(result);
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function refreshaddDstTransferConfigDialogContent(result) {
+		var exchange_content = "";
+		for (index in result.exchangeList) {
+			var exchange = result.exchangeList[index];
+			if (exchange.exchangeMic == result.exchangeMic) {
+				exchange_content = exchange_content + "<input type='radio' checked='checked' name='exchangeMic' onclick='onSelectionItemClick(event)' value=" + exchange.exchangeMic + " /><span style='width: 120px'>" + exchange.exchangeMic + "&nbsp;" + exchange.cnName + "</span><br>";
+			} else {
+				exchange_content = exchange_content + "<input type='radio' name='exchangeMic' onclick='onSelectionItemClick(event)' value=" + exchange.exchangeMic + " /><span style='width: 120px'>" + exchange.exchangeMic + "&nbsp;" + exchange.cnName + "</span><br>";
+			}
+		}
+		
+		var commodity_content = "";
+		for (index in result.LocalSimpleCommodityList) {
+			var commodity = result.LocalSimpleCommodityList[index];
+			commodity_content = commodity_content + "<div class='col-md-4 select_area_sub_item2_sub'><input class='right' type='checkbox' name='sledCommodityIds' value=" + commodity.sledCommodityId + " /><span style='width: 120px'>" + commodity.cnName + "</span></div>";
+		}
+		
+		$("#exchange_list").html(exchange_content);
+		$("#commodity_list").html(commodity_content);
+	}
+	
+	function addDstTransferConfig() {
+		// exchange
+		var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+		var exchangeMic = groupExchangeMic.attr("value");
+		
+		// commodity type
+		var groupCommodityType = $("[name='commodityType']").filter(":checked");
+		var commodityType = groupCommodityType.attr("value");
+		
+		// commodity list
+		var groupCommodity = $("[name='sledCommodityIds']").filter(":checked");
+		var commodityList = new Array();
+		for(var i = 0; i < groupCommodity.length; i++){
+			if(groupCommodity[i].checked) {
+				commodityList.push(groupCommodity[i].value);
+			}
+		}
+		
+		// standard2DstOffSetMinute
+		var standard2DstOffSetMinute = $("#standard2DstOffSetMinute").val();
+		
+		var request = {
+				exchangeMic : exchangeMic,
+				sledCommodityType : commodityType,
+				commodityIds : commodityList,
+				standard2DstOffSetMinute : standard2DstOffSetMinute,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledDstSwitchRuleAdmin/addDstTransferConfig",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/SledDstSwitchRuleAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function showDeleteDstTransferConfigDialog(dstTransferConfigId) {
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledDstSwitchRuleAdmin/deleteDstTransferConfig",
+				data : {
+					dstTransferConfigId : dstTransferConfigId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledDstSwitchRuleAdmin/show';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function unlockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledDstSwitchRuleAdmin/unlockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("退出编辑状态");
+					window.location.href='${base_url}/SledDstSwitchRuleAdmin/show';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	function lockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledDstSwitchRuleAdmin/lockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("进入编辑状态");
+					window.location.href='${base_url}/SledDstSwitchRuleAdmin/show';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

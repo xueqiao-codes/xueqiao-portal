@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>托管服务</title>
+		<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+		<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+		<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+		<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+		<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+		<style type="text/css">
+			.table td {
+				font-style: normal;
+				font-weight: normal;
+				text-align: center;
+			}
+			
+			.table th {
+				font-style: normal;
+				font-weight: normal;
+				text-align: center;
+				background: #F8FCFF;
+			}
+			
+			.bootstrap-table {
+				width: 100%;
+			}
+			
+			ul {
+				display: flex;
+			}
+			
+			ul li {
+
+				background: transparent;
+				display: inline-flex;
+				justify-content: center;
+				align-items: center;
+				padding-left: 20px;
+				padding-right: 20px;
+				font-size: 20px;
+				color: #909090;
+				cursor: pointer
+			}
+			
+			ul li.active {
+				border-width: 10px;
+				border-bottom-style: solid;
+				border-radius: 0px;
+				border-color: #369EEF;
+				text-align: center;
+				text-decoration: none;
+				font-size: 23px;
+				color: #369EEF;
+			}
+			.tab_container {
+				height: 53px;
+				overflow: auto;
+				<!--overflow-x: scroll;-->
+				overflow-y: hidden;
+			}
+			.tab_item {
+				white-space: nowrap;
+				<!--line-height: 25px;-->
+			}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div id="vue-app-company-hosting-service-admin">
+
+			<!-- navigation bar -->
+			<div class="navigation_bar">
+				<div class="vertical_center">
+					<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+					<span class="navigation_bar_font_link"><a href="${base_url}/SledCompanyAdmin/show">公司管理&nbsp;&nbsp;${companyName}</a></span>
+					<span>></span>
+					<span class="navigation_bar_font_default">托管服务</span>
+
+				</div>
+			</div>
+
+			<div class="col-md-12 general_margin_top">
+
+				<!-- title bar -->
+				<div class="sled_panel" style="height: 54px; width: 100%; background-color: white;">
+					<!-- <div class="vertical_center"> -->
+					<span class="general_margin_left title_font" style="height: 54px; line-height: 54px; float:left;"><b>托管服务</b></span>
+
+					<ul id="tab_ul" style="margin-left: 200px;" class="tab_container">
+						<li v-for="(hostingServiceGroup,index) in companyHostingServicePage.hostingServiceGroupList" @click="tabToggle(index)" class="tab_item" :class="{active:tabActive==index}">
+							{{hostingServiceGroup.groupName}}
+						</li>
+					</ul>
+					<!-- </div> -->
+				</div>
+
+				<div v-cloak v-if="isCompanyHostingServicePageShow">
+					<!-- content container -->
+					<div class="sled_panel general_margin_top">
+
+						<!-- content title bar -->
+						<div class="content_title_bar">
+							<div class=" vertical_center">
+								<span class="general_margin_left"><b>托管服务ID：</b></span> <a href="#" @click="gotoSledServerPage">{{selectedHostingServiceGroup.groupId}}</a>
+								<span style="margin-left: 80px;"><b>交易类型：</b></span> <span>{{selectedHostingServiceGroup.serviceType}}</span>
+								<span style="margin-left: 80px;"><b>规格：</b></span> <span>{{selectedHostingServiceGroup.specName}}</span>
+								<span style="margin-left: 80px;"><b>托管服务状态：</b></span> <span>{{selectedHostingServiceGroup.hostingServiceStatus}}</span>
+								<span style="margin-left: 80px;"><b>到期日：</b></span> <span>{{selectedHostingServiceGroup.expiredTimestamp}}</span>
+								<a v-if="isShowCurrentTabReleaseHostingBtn" style="margin-left: 80px;" href="#" @click="showReleaseHostingServiceDialog"><span class="danger_link_text"><b>释放服务</b></span></a>
+							</div>
+						</div>
+
+						<div v-if="isCurrentTabHostingRelease">
+							<div class="content_title_bar general_margin_top">
+								<div class=" vertical_center">
+									<span class="general_margin_left"><b>释放记录</b></span>
+								</div>
+							</div>
+							<div class="general_bg_default">
+								<div class="list_container">
+									<table class="table table-bordered" style="border: 1px;">
+										<tr bgColor=#F8FCFF>
+											<th width="50">释放时间</th>
+											<th width="200">原因</th>
+											<th width="50">操作人</th>
+										</tr>
+										<tr>
+											<td align="center">{{currentTabReleaseHostingDescription.releaseDay}}</td>
+											<td align="center">{{currentTabReleaseHostingDescription.reason}}</td>
+											<td align="center">{{currentTabReleaseHostingDescription.operator}}</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div v-else>
+							<div class="content_title_bar general_margin_top">
+								<div class=" vertical_center">
+									<span class="general_margin_left"><b>关联机器</b></span>
+								</div>
+							</div>
+							<div class="general_bg_default">
+								<div class="list_container">
+									<table class="table table-bordered" style="border: 1px;">
+										<tr bgColor=#F8FCFF>
+											<th width="50">服务器ID</th>
+											<th width="50">实例ID/名称</th>
+											<th width="50">运行状态</th>
+											<th width="50">到期时间</th>
+										</tr>
+										<tr>
+											<td align="center">{{selectedHostingServiceGroup.hostingMachineInfo.machineId}}</td>
+											<td align="center">{{selectedHostingServiceGroup.hostingMachineInfo.aliyunInstanceId}}/{{selectedHostingServiceGroup.hostingMachineInfo.machineHostname}}</td>
+											<td align="center">{{selectedHostingServiceGroup.hostingMachineInfo.runningStatus}}</td>
+											<td align="center">{{selectedHostingServiceGroup.hostingMachineInfo.aliyunExpiredTime}}</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
+
+						<div class="content_title_bar general_margin_top">
+							<div class=" vertical_center">
+								<span class="general_margin_left"><b>关联订单</b></span>
+							</div>
+						</div>
+						<!-- table -->
+						<div class="general_bg_default">
+							<div class="list_container">
+								<table class="table table-bordered" style="border: 1px;">
+									<tr bgColor=#F8FCFF>
+										<th width="50">订单号</th>
+										<th width="50">商品名</th>
+										<th width="50">下单时间</th>
+										<th width="50">金额</th>
+										<th width="50">订单状态</th>
+										<th width="50">变更时间</th>
+										<th width="50">操作</th>
+										<th width="50">操作人</th>
+										<th width="50">订单详情</th>
+									</tr>
+									<tr v-for="order in selectedHostingServiceGroup.orderList">
+										<td align="center">{{order.orderId}}</td>
+										<td align="center">{{order.productName}}</td>
+										<td align="center">{{order.createTimestamp}}</td>
+										<td align="center">{{order.totalAmount}}</td>
+
+										<td align="center">{{order.status}}</td>
+										<td align="center">{{order.lastModifyTimestamp}}</td>
+										<td align="center" v-if="isNeedOperate(order)">
+											<a href="#" @click="operateOrder(order)">{{order.operation}}</a>
+										</td>
+										<td align="center" v-else>{{order.operation}}</td>
+
+										<td align="center">{{order.operator}}</td>
+										<td align="center">
+											<a href="#" @click="queryOrderDetail(order)">查看</a>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Dialog -->
+			<div v-cloak class="dialog" v-if="isAllocateSpecDialogShow">
+				<div class="dialog_container">
+					<div class="dialog_title">
+						<span style="text-align: center;"><b>分配机器</b></span>
+					</div>
+					<div class="dialog_content">
+						<div style="padding-bottom: 5px;">
+							<span><b>订单信息</b></span>
+						</div>
+						<div>
+							<label class="dialog_input_key">新建服务规格：</label><span>{{allocateSpecInfo.currentType}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">新建服务时长：</label><span>{{allocateSpecInfo.timeIncrement}}天</span>
+						</div>
+						<div>&nbsp;</div>
+						<div style="padding-bottom: 5px;">
+							<span><b>选择机器</b></span>
+						</div>
+						<div>
+							<table class="table table-bordered" style="border: 1px;">
+								<tr bgColor=#F8FCFF>
+									<th width="50"></th>
+									<th width="50">实例ID/名称</th>
+									<th width="50">所在可用区</th>
+									<th width="100">IP地址</th>
+									<th width="50">运行状态</th>
+									<th width="50">网络类型</th>
+									<th width="50">配置</th>
+									<th width="50">付费方式</th>
+									<th width="50">到期时间</th>
+								</tr>
+								<tr v-for="hostingMachineInfo in allocateSpecInfo.hostingMachineInfoList">
+									<td align="center"><input type='radio' name='hostingMachineInfo' v-bind:value="hostingMachineInfo.machineId" v-model="allocateSpecInfo.machineId" /></td>
+									<td align="center">{{hostingMachineInfo.instanceId}}&nbsp;/&nbsp;{{hostingMachineInfo.machineHostname}}</td>
+									<td align="center">{{hostingMachineInfo.zoneId}}</td>
+									<td align="center">{{hostingMachineInfo.ipAddress}}</td>
+									<td align="center">{{hostingMachineInfo.runningStatus}}</td>
+									<td align="center">{{hostingMachineInfo.instanceNetworkType}}</td>
+									<td align="center">{{hostingMachineInfo.machineSpec}}</td>
+									<td align="center">{{hostingMachineInfo.instanceChargeType}}</td>
+									<td align="center">{{hostingMachineInfo.aliyunExpiredTime}}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="dialog_btn">
+						<button @click="allocateSpecDialogConfirm" class="btn">确定</button>
+						<button @click="allocateSpecDialogCancel" class="btn">取消</button>
+					</div>
+				</div>
+			</div>
+
+			<div v-cloak class="dialog" v-if="isUpgradeSpecDialogShow">
+				<div class="dialog_container" style="width: 500px;">
+					<div class="dialog_title">
+						<span style="text-align: center;"><b>变更规格</b></span>
+					</div>
+					<div class="dialog_content">
+						<div style="padding-bottom: 5px;">
+							<span><b>订单信息</b></span>
+						</div>
+						<div>
+							<label class="dialog_input_key">当前服务规格：</label><span>{{upgradeSpecInfo.currentType}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">需要变更至：</label><span style="color: orange;">{{upgradeSpecInfo.purposeType}}</span>
+						</div>
+						<div>&nbsp;</div>
+						<div style="padding-bottom: 5px;">
+							<span style="padding-"><b>需要变更的机器</b></span>
+						</div>
+						<div>
+							<label class="dialog_input_key">服务器ID：</label><span>{{upgradeSpecInfo.machineId}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">当前机器配置：</label><span>{{upgradeSpecInfo.machineSpec}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">需要变量至：</label><span style="color: orange;">{{upgradeSpecInfo.description}}</span>
+						</div>
+
+						<div style="padding-top: 30px;">
+							<span style="color: orange;">注：确定变量前请在阿里云完成相应变更操作！</span>
+						</div>
+					</div>
+					<div class="dialog_btn">
+						<button @click="upgradeSpecDialogConfirm" class="btn">确定</button>
+						<button @click="upgradeSpecDialogCancel" class="btn">取消</button>
+					</div>
+				</div>
+			</div>
+
+			<div v-cloak class="dialog" v-if="isOrderDetailDialogShow">
+				<div class="dialog_container" style="width: 600px;">
+					<div class="dialog_title">
+						<span style="text-align: center;"><b>订单详情</b></span>
+					</div>
+					<div class="dialog_content">
+						<div style="padding-bottom: 5px;">
+							<span><b>基本信息</b></span>
+						</div>
+						<div>
+							<label class="dialog_input_key">订单号：</label> <span>{{orderDetail.orderId}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">商品名：</label><span>{{orderDetail.productName}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">公司ID：</label><span>{{orderDetail.companyId}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">托管服务ID：</label><span>{{orderDetail.companyGroupId}}</span>
+						</div>
+						<div>&nbsp;</div>
+						<div style="padding-bottom: 5px;">
+							<span><b>支付信息</b></span>
+						</div>
+						<div>
+							<label class="dialog_input_key">支付方式：</label><span>{{orderDetail.payType}}</span>
+						</div>
+						<div>
+							<label class="dialog_input_key">支付订单号：</label><span>{{orderDetail.thirdPartyOrderNo}}</span>
+						</div>
+						<div>&nbsp;</div>
+						<div style="padding-bottom: 5px;">
+							<span><b>状态变量信息</b></span>
+						</div>
+						<div>
+							<table class="table table-bordered" style="border: 1px;">
+								<tr bgColor=#F8FCFF>
+									<th width="50">时间</th>
+									<th width="50">内容</th>
+								</tr>
+								<tr v-for="orderFlow in orderDetailOrderFlow">
+									<td align="center">{{orderFlow.createTimestamp}}</td>
+									<td align="center">{{orderFlow.description}}</td>
+								</tr>
+							</table>
+						</div>
+
+					</div>
+					<div class="dialog_btn">
+						<button @click="orderDetailDialogConfirm" class="btn">确定</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Release hosting service dialog -->
+			<div v-cloak class="dialog" v-if="isReleaseHostingServiceDialogShow">
+				<div class="dialog_container" style="width: 500px;">
+					<div class="dialog_title">
+						<span style="text-align: center;"><b>释放服务</b></span>
+					</div>
+					<div class="dialog_content">
+						<div>
+							<label class="dialog_input_key" style="display: inline-block; vertical-align: top;">释放原因：</label>
+							<textarea rows="3" cols="30" v-model="releaseHostingServiceReason"></textarea>
+						</div>
+					</div>
+					<div class="dialog_btn">
+						<button @click="releaseHostingServiceConfirm" class="btn">确定</button>
+						<button @click="releaseHostingServiceCancel" class="btn">取消</button>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<script>
+			window.companyId = ${companyId?c};
+		</script>
+		<script type="text/javascript" src="${static_url}/js/sled.company.hostingservice.js"></script>
+	</body>
+
+</html>

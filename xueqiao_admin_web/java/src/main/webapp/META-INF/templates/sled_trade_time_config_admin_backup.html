@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易时间管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledTradeTimeAdmin/show">交易时间管理</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_default">设置交易时间</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode"><#if moduleEditable == 1><a href="javascript:unlockModule();">退出编辑状态</a><#else><a href="javascript:lockModule();">进入编辑状态</a></#if></div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>${exchangeMic!''}&nbsp;&nbsp;${sledCommodityCnName}&nbsp;&nbsp;设置交易时间</b></span>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="50"></th>
+							<th class="table_nav_key" width="100">T时段(冬令时)</th>
+							<th class="table_nav_key" width="100">T时间(夏令时)</th>
+							<th class="table_nav_key" width="100">T+1时段(冬令时)</th>
+							<th class="table_nav_key" width="100">T+1时间(夏令时)</th>
+							<th class="table_nav_key" width="50">编辑</th>
+						</tr>
+						<#if sledTradeTimeConfigList??>
+							<#list sledTradeTimeConfigList as sledTradeTimeConfig>
+								<tr>
+									<td align="center">${sledTradeTimeConfig.weekDayCN!''}</td>
+									
+									<#if sledTradeTimeConfig.localTradeTimes??>
+										<td align="center">
+											<#list sledTradeTimeConfig.localTradeTimes as tradeTime>
+												${tradeTime!''}<br>
+											</#list>
+										</td>
+									<#else>
+										<td align="center">-</td>
+									</#if>
+									
+									<#if sledTradeTimeConfig.dstTradeTimes??>
+										<td align="center">
+											<#list sledTradeTimeConfig.dstTradeTimes as dstTradeTime>
+												${dstTradeTime!''}<br>
+											</#list>
+										</td>
+									<#else>
+										<td align="center">-</td>
+									</#if>
+									
+									<#if sledTradeTimeConfig.localPlusOneTradeTimes??>
+										<td align="center">
+											<#list sledTradeTimeConfig.localPlusOneTradeTimes as plusOneTradeTime>
+												${plusOneTradeTime!''}<br>
+											</#list>
+										</td>
+									<#else>
+										<td align="center">-</td>
+									</#if>
+									
+									<#if sledTradeTimeConfig.dstPlusOneTradeTimes??>
+										<td align="center">
+											<#list sledTradeTimeConfig.dstPlusOneTradeTimes as dstPlusOneTradeTime>
+												${dstPlusOneTradeTime!''}<br>
+											</#list>
+										</td>
+									<#else>
+										<td align="center">-</td>
+									</#if>
+									
+									<#if moduleEditable == 1>
+										<td align="center"><a href="javascript:showModifyLocalTradeTimeDialog('${sledTradeTimeConfig.weekDayCN!''}', '${sledTradeTimeConfig.weekDayEN!''}');"><img src="${static_url}/img/icon_edit.png"/></a></td>
+									<#else>
+										<td align="center"><img src="${static_url}/img/icon_edit_disabled.png"/></td>
+									</#if>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+	
+	<!-- Dialog -->
+	<div id="modify_local_trade_time_dialog">
+		<input type="hidden" name="trade_time_weekday_en" id="trade_time_weekday_en">
+		<fieldset>
+			<input class="dialog_input_value_readonly" type="text" name="week_day" id="week_day"  readonly="true" style="font-size: 16px;">
+		</fieldset>
+		<fieldset>
+			<label >冬令时</label>&nbsp;&nbsp;
+		</fieldset>
+		<div style="height: 10px;"></div>
+		<fieldset>
+			<input type="checkbox" name="t_trade_time_1_enable" id="t_trade_time_1_enable"/>&nbsp;
+			<label style="width: 70px;">T时段1</label>&nbsp;&nbsp;
+			<label>开始时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_1_start" id="t_trade_time_1_start" value="00:00" disabled="disabled" onchange="onTradeTime1Change(event)">&nbsp;
+			<label>结束时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_1_end" id="t_trade_time_1_end" value="00:00" disabled="disabled" onchange="onTradeTime1Change(event)">
+			<input type="text" name="trade_time_1_next_day" id="trade_time_1_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+			<script>
+				var tradeTimeEnable1 = document.getElementById('t_trade_time_1_enable');
+				var tradeTimeStart1 = document.getElementById('t_trade_time_1_start');
+				var tradeTimeEnd1 = document.getElementById('t_trade_time_1_end');
+				tradeTimeEnable1.onclick = function( event ) {
+					if (this.checked) {
+						tradeTimeStart1.disabled = false;
+						tradeTimeEnd1.disabled = false;
+					} else {
+						tradeTimeStart1.disabled = true;
+						tradeTimeEnd1.disabled = true;
+					}
+				}
+				
+				function onTradeTime1Change(event) {
+					var t_trade_time_1_start = $("#t_trade_time_1_start").val();
+					var t_trade_time_1_end = $("#t_trade_time_1_end").val();
+					var t_trade_time_1_start_hour = t_trade_time_1_start.substring(0,2);
+					var t_trade_time_1_end_hour = t_trade_time_1_end.substring(0,2);
+					if (parseInt(t_trade_time_1_start_hour) > parseInt(t_trade_time_1_end_hour)) {
+						$("#trade_time_1_next_day").val("次交易日");
+					} else if (parseInt(t_trade_time_1_start_hour) < parseInt(t_trade_time_1_end_hour)){
+						$("#trade_time_1_next_day").val("");
+					} else {
+						var t_trade_time_1_start_minute = t_trade_time_1_start.substring(3);
+						var t_trade_time_1_end_minute = t_trade_time_1_end.substring(3);
+						if (parseInt(t_trade_time_1_start_minute) > parseInt(t_trade_time_1_end_minute)) {
+							$("#trade_time_1_next_day").val("次交易日");
+						} else {
+							$("#trade_time_1_next_day").val("");
+						}
+					}
+				}
+			</script>
+		</fieldset>
+		<fieldset>
+			<input type="checkbox" name="t_trade_time_2_enable" id="t_trade_time_2_enable"/>&nbsp;
+			<label style="width: 70px;">T时段2</label>&nbsp;&nbsp;
+			<label>开始时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_2_start" id="t_trade_time_2_start" value="00:00" disabled="disabled" onchange="onTradeTime2Change(event)">&nbsp;
+			<label>结束时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_2_end" id="t_trade_time_2_end" value="00:00" disabled="disabled" onchange="onTradeTime2Change(event)">
+			<input type="text" name="trade_time_2_next_day" id="trade_time_2_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+			<script>
+				var tradeTimeEnable2 = document.getElementById('t_trade_time_2_enable');
+				var tradeTimeStart2 = document.getElementById('t_trade_time_2_start');
+				var tradeTimeEnd2 = document.getElementById('t_trade_time_2_end');
+				tradeTimeEnable2.onclick = function( event ) {
+					if (this.checked) {
+						tradeTimeStart2.disabled = false;
+						tradeTimeEnd2.disabled = false;
+					} else {
+						tradeTimeStart2.disabled = true;
+						tradeTimeEnd2.disabled = true;
+					}
+				}
+				
+				function onTradeTime2Change(event) {
+					var t_trade_time_2_start = $("#t_trade_time_2_start").val();
+					var t_trade_time_2_end = $("#t_trade_time_2_end").val();
+					var t_trade_time_2_start_hour = t_trade_time_2_start.substring(0,2);
+					var t_trade_time_2_end_hour = t_trade_time_2_end.substring(0,2);
+					if (parseInt(t_trade_time_2_start_hour) > parseInt(t_trade_time_2_end_hour)) {
+						$("#trade_time_2_next_day").val("次交易日");
+					} else if (parseInt(t_trade_time_2_start_hour) < parseInt(t_trade_time_2_end_hour)) {
+						$("#trade_time_2_next_day").val("");
+					} else {
+						var t_trade_time_2_start_minute = t_trade_time_2_start.substring(3);
+						var t_trade_time_2_end_minute = t_trade_time_2_end.substring(3);
+						if (parseInt(t_trade_time_2_start_minute) > parseInt(t_trade_time_2_end_minute)) {
+							$("#trade_time_2_next_day").val("次交易日");
+						} else {
+							$("#trade_time_2_next_day").val("");
+						}
+					}
+				}
+			</script>
+		</fieldset>
+		<fieldset>
+			<input type="checkbox" name="t_trade_time_3_enable" id="t_trade_time_3_enable"/>&nbsp;
+			<label style="width: 70px;">T时段3</label>&nbsp;&nbsp;
+			<label>开始时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_3_start" id="t_trade_time_3_start" value="00:00" disabled="disabled" onchange="onTradeTime3Change(event)">&nbsp;
+			<label>结束时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_trade_time_3_end" id="t_trade_time_3_end" value="00:00" disabled="disabled" onchange="onTradeTime3Change(event)">&nbsp;
+			<input type="text" name="trade_time_3_next_day" id="trade_time_3_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+			<script>
+				var tradeTimeEnable3 = document.getElementById('t_trade_time_3_enable');
+				var tradeTimeStart3 = document.getElementById('t_trade_time_3_start');
+				var tradeTimeEnd3 = document.getElementById('t_trade_time_3_end');
+				tradeTimeEnable3.onclick = function( event ) {
+					if (this.checked) {
+						tradeTimeStart3.disabled = false;
+						tradeTimeEnd3.disabled = false;
+					} else {
+						tradeTimeStart3.disabled = true;
+						tradeTimeEnd3.disabled = true;
+					}
+				}
+				
+				function onTradeTime3Change(event) {
+					var t_trade_time_3_start = $("#t_trade_time_3_start").val();
+					var t_trade_time_3_end = $("#t_trade_time_3_end").val();
+					var t_trade_time_3_start_hour = t_trade_time_3_start.substring(0,2);
+					var t_trade_time_3_end_hour = t_trade_time_3_end.substring(0,2);
+					if (parseInt(t_trade_time_3_start_hour) > parseInt(t_trade_time_3_end_hour)) {
+						$("#trade_time_3_next_day").val("次交易日");
+					} else if (parseInt(t_trade_time_3_start_hour) < parseInt(t_trade_time_3_end_hour)) {
+						$("#trade_time_3_next_day").val("");
+					} else {
+						var t_trade_time_3_start_minute = t_trade_time_3_start.substring(3);
+						var t_trade_time_3_end_minute = t_trade_time_3_end.substring(3);
+						if (parseInt(t_trade_time_3_start_minute) > parseInt(t_trade_time_3_end_minute)) {
+							$("#trade_time_3_next_day").val("次交易日");
+						} else {
+							$("#trade_time_3_next_day").val("");
+						}
+					}
+				}
+			</script>
+		</fieldset>
+		
+		<div style="height: 10px;"></div>
+		
+		<fieldset>
+			<input type="checkbox" name="t_t_plus_one_trade_time_1_enable" id="t_t_plus_one_trade_time_1_enable"/>&nbsp;
+			<label style="width: 70px;">T+1时段1</label>&nbsp;&nbsp;
+			<label>开始时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_t_plus_one_trade_time_1_start" id="t_t_plus_one_trade_time_1_start" value="00:00" disabled="disabled" onchange="onTPlusOneTradeTime1Change(event)">&nbsp;
+			<label>结束时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_t_plus_one_trade_time_1_end" id="t_t_plus_one_trade_time_1_end" value="00:00" disabled="disabled" onchange="onTPlusOneTradeTime1Change(event)">
+			<input type="text" name="t_plus_one_trade_time_1_next_day" id="t_plus_one_trade_time_1_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+			<script>
+				var tPlusOneTradeTimeEnable1 = document.getElementById('t_t_plus_one_trade_time_1_enable');
+				var tPlusOneTradeTimeStart1 = document.getElementById('t_t_plus_one_trade_time_1_start');
+				var tPlusOneTradeTimeEnd1 = document.getElementById('t_t_plus_one_trade_time_1_end');
+				tPlusOneTradeTimeEnable1.onclick = function( event ) {
+					if (this.checked) {
+						tPlusOneTradeTimeStart1.disabled = false;
+						tPlusOneTradeTimeEnd1.disabled = false;
+					} else {
+						tPlusOneTradeTimeStart1.disabled = true;
+						tPlusOneTradeTimeEnd1.disabled = true;
+					}
+				}
+				
+				function onTPlusOneTradeTime1Change(event) {
+					var t_t_plus_one_trade_time_1_start = $("#t_t_plus_one_trade_time_1_start").val();
+					var t_t_plus_one_trade_time_1_end = $("#t_t_plus_one_trade_time_1_end").val();
+					var t_t_plus_one_trade_time_1_start_hour = t_t_plus_one_trade_time_1_start.substring(0,2);
+					var t_t_plus_one_trade_time_1_end_hour = t_t_plus_one_trade_time_1_end.substring(0,2);
+					if (parseInt(t_t_plus_one_trade_time_1_start_hour) > parseInt(t_t_plus_one_trade_time_1_end_hour)) {
+						$("#t_plus_one_trade_time_1_next_day").val("次交易日");
+					} else if (parseInt(t_t_plus_one_trade_time_1_start_hour) < parseInt(t_t_plus_one_trade_time_1_end_hour)) {
+						$("#t_plus_one_trade_time_1_next_day").val("");
+					} else {
+						var t_t_plus_one_trade_time_1_start_minute = t_t_plus_one_trade_time_1_start.substring(3);
+						var t_t_plus_one_trade_time_1_end_minute = t_t_plus_one_trade_time_1_end.substring(3);
+						if (parseInt(t_t_plus_one_trade_time_1_start_minute) > parseInt(t_t_plus_one_trade_time_1_end_minute)) {
+							$("#t_plus_one_trade_time_1_next_day").val("次交易日");
+						} else {
+							$("#t_plus_one_trade_time_1_next_day").val("");
+						}
+					}
+				}
+			</script>
+		</fieldset>
+		<fieldset>
+			<input type="checkbox" name="t_t_plus_one_trade_time_2_enable" id="t_t_plus_one_trade_time_2_enable"/>&nbsp;
+			<label style="width: 70px;">T+1时段2</label>&nbsp;&nbsp;
+			<label>开始时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_t_plus_one_trade_time_2_start" id="t_t_plus_one_trade_time_2_start" value="00:00" disabled="disabled" onchange="onTPlusOneTradeTime2Change(event)">&nbsp;
+			<label>结束时间:</label>
+			<input class="dialog_input_time_value" type="time" name="t_t_plus_one_trade_time_2_end" id="t_t_plus_one_trade_time_2_end" value="00:00" disabled="disabled" onchange="onTPlusOneTradeTime2Change(event)">&nbsp;
+			<input type="text" name="t_plus_one_trade_time_2_next_day" id="t_plus_one_trade_time_2_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+			<script>
+				var tPlusOneTradeTimeEnable2 = document.getElementById('t_t_plus_one_trade_time_2_enable');
+				var tPlusOneTradeTimeStart2 = document.getElementById('t_t_plus_one_trade_time_2_start');
+				var tPlusOneTradeTimeEnd2 = document.getElementById('t_t_plus_one_trade_time_2_end');
+				var tPlusOneTradeTime2NextDay = document.getElementById('t_plus_one_trade_time_2_next_day');
+				tPlusOneTradeTimeEnable2.onclick = function( event ) {
+					if (this.checked) {
+						tPlusOneTradeTimeStart2.disabled = false;
+						tPlusOneTradeTimeEnd2.disabled = false;
+					} else {
+						tPlusOneTradeTimeStart2.disabled = true;
+						tPlusOneTradeTimeEnd2.disabled = true;
+					}
+				}
+				
+				function onTPlusOneTradeTime2Change(event) {
+					var t_t_plus_one_trade_time_2_start = $("#t_t_plus_one_trade_time_2_start").val();
+					var t_t_plus_one_trade_time_2_end = $("#t_t_plus_one_trade_time_2_end").val();
+					var t_t_plus_one_trade_time_2_start_hour = t_t_plus_one_trade_time_2_start.substring(0,2);
+					var t_t_plus_one_trade_time_2_end_hour = t_t_plus_one_trade_time_2_end.substring(0,2);
+					if (parseInt(t_t_plus_one_trade_time_2_start_hour) > parseInt(t_t_plus_one_trade_time_2_end_hour)) {
+						$("#t_plus_one_trade_time_2_next_day").val("次交易日");
+					} else if (parseInt(t_t_plus_one_trade_time_2_start_hour) < parseInt(t_t_plus_one_trade_time_2_end_hour)){
+						$("#t_plus_one_trade_time_2_next_day").val("");
+					} else {
+						var t_t_plus_one_trade_time_2_start_minute = t_t_plus_one_trade_time_2_start.substring(3);
+						var t_t_plus_one_trade_time_2_end_minute = t_t_plus_one_trade_time_2_end.substring(3);
+						if (parseInt(t_t_plus_one_trade_time_2_start_minute) > parseInt(t_t_plus_one_trade_time_2_end_minute)) {
+							$("#t_plus_one_trade_time_2_next_day").val("次交易日");
+						} else {
+							$("#t_plus_one_trade_time_2_next_day").val("");
+						}
+					}
+				}
+			</script>
+		</fieldset>
+		<div style="height: 20px;"></div>
+		
+		<!-- --------------------- DST -------------------------- -->
+		
+		<fieldset>
+			<input type="checkbox" id="show_dst" name='show_dst' onclick='onShowDstArea(event)'/>&nbsp;&nbsp;
+			<label style="color: red;">编辑特殊夏令时时间</label>
+			<!-- <label style="color: red;">夏令时&nbsp;&nbsp;</label>
+			<input type="radio" name='standardOrDst' value="1"/> -->
+		</fieldset>
+		
+		<div id="dst_area" name="dst_area" style="display: none;">
+			<div style="height: 10px;"></div>
+			<fieldset>
+				<input type="checkbox" name="dst_t_trade_time_1_enable" id="dst_t_trade_time_1_enable"/>&nbsp;
+				<label style="width: 70px;">T时段1</label>&nbsp;&nbsp;
+				<label>开始时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_1_start" id="dst_t_trade_time_1_start" value="00:00" disabled="disabled" onchange="onDstTradeTime1Change(event)">&nbsp;
+				<label>结束时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_1_end" id="dst_t_trade_time_1_end" value="00:00" disabled="disabled" onchange="onDstTradeTime1Change(event)">
+				<input type="text" name="dst_trade_time_1_next_day" id="dst_trade_time_1_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+				<script>
+					var dstTradeTimeEnable1 = document.getElementById('dst_t_trade_time_1_enable');
+					var dstTradeTimeStart1 = document.getElementById('dst_t_trade_time_1_start');
+					var dstTradeTimeEnd1 = document.getElementById('dst_t_trade_time_1_end');
+					dstTradeTimeEnable1.onclick = function( event ) {
+						if (this.checked) {
+							dstTradeTimeStart1.disabled = false;
+							dstTradeTimeEnd1.disabled = false;
+						} else {
+							dstTradeTimeStart1.disabled = true;
+							dstTradeTimeEnd1.disabled = true;
+						}
+					}
+					
+					function onDstTradeTime1Change(event) {
+						var dst_t_trade_time_1_start = $("#dst_t_trade_time_1_start").val();
+						var dst_t_trade_time_1_end = $("#dst_t_trade_time_1_end").val();
+						var dst_t_trade_time_1_start_hour = dst_t_trade_time_1_start.substring(0,2);
+						var dst_t_trade_time_1_end_hour = dst_t_trade_time_1_end.substring(0,2);
+						if (parseInt(dst_t_trade_time_1_start_hour) > parseInt(dst_t_trade_time_1_end_hour)) {
+							$("#dst_trade_time_1_next_day").val("次交易日");
+						} else if (parseInt(dst_t_trade_time_1_start_hour) < parseInt(dst_t_trade_time_1_end_hour)){
+							$("#dst_trade_time_1_next_day").val("");
+						} else {
+							var dst_t_trade_time_1_start_minute = dst_t_trade_time_1_start.substring(3);
+							var dst_t_trade_time_1_end_minute = dst_t_trade_time_1_end.substring(3);
+							if (parseInt(dst_t_trade_time_1_start_minute) > parseInt(dst_t_trade_time_1_end_minute)) {
+								$("#dst_trade_time_1_next_day").val("次交易日");
+							} else {
+								$("#dst_trade_time_1_next_day").val("");
+							}
+						}
+					}
+				</script>
+			</fieldset>
+			<fieldset>
+				<input type="checkbox" name="dst_t_trade_time_2_enable" id="dst_t_trade_time_2_enable"/>&nbsp;
+				<label style="width: 70px;">T时段2</label>&nbsp;&nbsp;
+				<label>开始时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_2_start" id="dst_t_trade_time_2_start" value="00:00" disabled="disabled" onchange="onDstTradeTime2Change(event)">&nbsp;
+				<label>结束时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_2_end" id="dst_t_trade_time_2_end" value="00:00" disabled="disabled" onchange="onDstTradeTime2Change(event)">
+				<input type="text" name="dst_trade_time_2_next_day" id="dst_trade_time_2_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+				<script>
+					var dstTradeTimeEnable2 = document.getElementById('dst_t_trade_time_2_enable');
+					var dstTradeTimeStart2 = document.getElementById('dst_t_trade_time_2_start');
+					var dstTradeTimeEnd2 = document.getElementById('dst_t_trade_time_2_end');
+					dstTradeTimeEnable2.onclick = function( event ) {
+						if (this.checked) {
+							dstTradeTimeStart2.disabled = false;
+							dstTradeTimeEnd2.disabled = false;
+						} else {
+							dstTradeTimeStart2.disabled = true;
+							dstTradeTimeEnd2.disabled = true;
+						}
+					}
+					
+					function onDstTradeTime2Change(event) {
+						var dst_t_trade_time_2_start = $("#dst_t_trade_time_2_start").val();
+						var dst_t_trade_time_2_end = $("#dst_t_trade_time_2_end").val();
+						var dst_t_trade_time_2_start_hour = dst_t_trade_time_2_start.substring(0,2);
+						var dst_t_trade_time_2_end_hour = dst_t_trade_time_2_end.substring(0,2);
+						if (parseInt(dst_t_trade_time_2_start_hour) > parseInt(dst_t_trade_time_2_end_hour)) {
+							$("#dst_trade_time_2_next_day").val("次交易日");
+						} else if (parseInt(dst_t_trade_time_2_start_hour) < parseInt(dst_t_trade_time_2_end_hour)) {
+							$("#dst_trade_time_2_next_day").val("");
+						} else {
+							var dst_t_trade_time_2_start_minute = dst_t_trade_time_2_start.substring(3);
+							var dst_t_trade_time_2_end_minute = dst_t_trade_time_2_end.substring(3);
+							if (parseInt(dst_t_trade_time_2_start_minute) > parseInt(dst_t_trade_time_2_end_minute)) {
+								$("#dst_trade_time_2_next_day").val("次交易日");
+							} else {
+								$("#dst_trade_time_2_next_day").val("");
+							}
+						}
+					}
+				</script>
+			</fieldset>
+			<fieldset>
+				<input type="checkbox" name="dst_t_trade_time_3_enable" id="dst_t_trade_time_3_enable"/>&nbsp;
+				<label style="width: 70px;">T时段3</label>&nbsp;&nbsp;
+				<label>开始时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_3_start" id="dst_t_trade_time_3_start" value="00:00" disabled="disabled" onchange="onDstTradeTime3Change(event)">&nbsp;
+				<label>结束时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_trade_time_3_end" id="dst_t_trade_time_3_end" value="00:00" disabled="disabled" onchange="onDstTradeTime3Change(event)">&nbsp;
+				<input type="text" name="dst_trade_time_3_next_day" id="dst_trade_time_3_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+				<script>
+					var dstTradeTimeEnable3 = document.getElementById('dst_t_trade_time_3_enable');
+					var dstTradeTimeStart3 = document.getElementById('dst_t_trade_time_3_start');
+					var dstTradeTimeEnd3 = document.getElementById('dst_t_trade_time_3_end');
+					dstTradeTimeEnable3.onclick = function( event ) {
+						if (this.checked) {
+							dstTradeTimeStart3.disabled = false;
+							dstTradeTimeEnd3.disabled = false;
+						} else {
+							dstTradeTimeStart3.disabled = true;
+							dstTradeTimeEnd3.disabled = true;
+						}
+					}
+					
+					function onDstTradeTime3Change(event) {
+						var dst_t_trade_time_3_start = $("#dst_t_trade_time_3_start").val();
+						var dst_t_trade_time_3_end = $("#dst_t_trade_time_3_end").val();
+						var dst_t_trade_time_3_start_hour = dst_t_trade_time_3_start.substring(0,2);
+						var dst_t_trade_time_3_end_hour = dst_t_trade_time_3_end.substring(0,2);
+						if (parseInt(dst_t_trade_time_3_start_hour) > parseInt(dst_t_trade_time_3_end_hour)) {
+							$("#dst_trade_time_3_next_day").val("次交易日");
+						} else if (parseInt(dst_t_trade_time_3_start_hour) < parseInt(dst_t_trade_time_3_end_hour)) {
+							$("#dst_trade_time_3_next_day").val("");
+						} else {
+							var dst_t_trade_time_3_start_minute = dst_t_trade_time_3_start.substring(3);
+							var dst_t_trade_time_3_end_minute = dst_t_trade_time_3_end.substring(3);
+							if (parseInt(dst_t_trade_time_3_start_minute) > parseInt(dst_t_trade_time_3_end_minute)) {
+								$("#dst_trade_time_3_next_day").val("次交易日");
+							} else {
+								$("#dst_trade_time_3_next_day").val("");
+							}
+						}
+					}
+				</script>
+			</fieldset>
+			
+			<div style="height: 10px;"></div>
+			
+			<fieldset>
+				<input type="checkbox" name="dst_t_t_plus_one_trade_time_1_enable" id="dst_t_t_plus_one_trade_time_1_enable"/>&nbsp;
+				<label style="width: 70px;">T+1时段1</label>&nbsp;&nbsp;
+				<label>开始时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_t_plus_one_trade_time_1_start" id="dst_t_t_plus_one_trade_time_1_start" value="00:00" disabled="disabled" onchange="onDstTPlusOneTradeTime1Change(event)">&nbsp;
+				<label>结束时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_t_plus_one_trade_time_1_end" id="dst_t_t_plus_one_trade_time_1_end" value="00:00" disabled="disabled" onchange="onDstTPlusOneTradeTime1Change(event)">
+				<input type="text" name="dst_t_plus_one_trade_time_1_next_day" id="dst_t_plus_one_trade_time_1_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+				<script>
+					var dstTPlusOneTradeTimeEnable1 = document.getElementById('dst_t_t_plus_one_trade_time_1_enable');
+					var dstTPlusOneTradeTimeStart1 = document.getElementById('dst_t_t_plus_one_trade_time_1_start');
+					var dstTPlusOneTradeTimeEnd1 = document.getElementById('dst_t_t_plus_one_trade_time_1_end');
+					dstTPlusOneTradeTimeEnable1.onclick = function( event ) {
+						if (this.checked) {
+							dstTPlusOneTradeTimeStart1.disabled = false;
+							dstTPlusOneTradeTimeEnd1.disabled = false;
+						} else {
+							dstTPlusOneTradeTimeStart1.disabled = true;
+							dstTPlusOneTradeTimeEnd1.disabled = true;
+						}
+					}
+					
+					function onDstTPlusOneTradeTime1Change(event) {
+						var dst_t_t_plus_one_trade_time_1_start = $("#dst_t_t_plus_one_trade_time_1_start").val();
+						var dst_t_t_plus_one_trade_time_1_end = $("#dst_t_t_plus_one_trade_time_1_end").val();
+						var dst_t_t_plus_one_trade_time_1_start_hour = dst_t_t_plus_one_trade_time_1_start.substring(0,2);
+						var dst_t_t_plus_one_trade_time_1_end_hour = dst_t_t_plus_one_trade_time_1_end.substring(0,2);
+						if (parseInt(dst_t_t_plus_one_trade_time_1_start_hour) > parseInt(dst_t_t_plus_one_trade_time_1_end_hour)) {
+							$("#dst_t_plus_one_trade_time_1_next_day").val("次交易日");
+						} else if (parseInt(dst_t_t_plus_one_trade_time_1_start_hour) < parseInt(dst_t_t_plus_one_trade_time_1_end_hour)) {
+							$("#dst_t_plus_one_trade_time_1_next_day").val("");
+						} else {
+							var dst_t_t_plus_one_trade_time_1_start_minute = dst_t_t_plus_one_trade_time_1_start.substring(3);
+							var dst_t_t_plus_one_trade_time_1_end_minute = dst_t_t_plus_one_trade_time_1_end.substring(3);
+							if (parseInt(dst_t_t_plus_one_trade_time_1_start_minute) > parseInt(dst_t_t_plus_one_trade_time_1_end_minute)) {
+								$("#dst_t_plus_one_trade_time_1_next_day").val("次交易日");
+							} else {
+								$("#dst_t_plus_one_trade_time_1_next_day").val("");
+							}
+						}
+					}
+				</script>
+			</fieldset>
+			<fieldset>
+				<input type="checkbox" name="dst_t_t_plus_one_trade_time_2_enable" id="dst_t_t_plus_one_trade_time_2_enable"/>&nbsp;
+				<label style="width: 70px;">T+1时段2</label>&nbsp;&nbsp;
+				<label>开始时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_t_plus_one_trade_time_2_start" id="dst_t_t_plus_one_trade_time_2_start" value="00:00" disabled="disabled" onchange="onDstTPlusOneTradeTime2Change(event)">&nbsp;
+				<label>结束时间:</label>
+				<input class="dialog_input_time_value" type="time" name="dst_t_t_plus_one_trade_time_2_end" id="dst_t_t_plus_one_trade_time_2_end" value="00:00" disabled="disabled" onchange="onDstTPlusOneTradeTime2Change(event)">&nbsp;
+				<input type="text" name="dst_t_plus_one_trade_time_2_next_day" id="dst_t_plus_one_trade_time_2_next_day"  readonly="true" value="" style="width: 70px; border: none;">
+				<script>
+					var dstTPlusOneTradeTimeEnable2 = document.getElementById('dst_t_t_plus_one_trade_time_2_enable');
+					var dstTPlusOneTradeTimeStart2 = document.getElementById('dst_t_t_plus_one_trade_time_2_start');
+					var dstTPlusOneTradeTimeEnd2 = document.getElementById('dst_t_t_plus_one_trade_time_2_end');
+					var dstTPlusOneTradeTime2NextDay = document.getElementById('dst_t_plus_one_trade_time_2_next_day');
+					dstTPlusOneTradeTimeEnable2.onclick = function( event ) {
+						if (this.checked) {
+							dstTPlusOneTradeTimeStart2.disabled = false;
+							dstTPlusOneTradeTimeEnd2.disabled = false;
+						} else {
+							dstTPlusOneTradeTimeStart2.disabled = true;
+							dstTPlusOneTradeTimeEnd2.disabled = true;
+						}
+					}
+					
+					function onDstTPlusOneTradeTime2Change(event) {
+						var dst_t_t_plus_one_trade_time_2_start = $("#dst_t_t_plus_one_trade_time_2_start").val();
+						var dst_t_t_plus_one_trade_time_2_end = $("#dst_t_t_plus_one_trade_time_2_end").val();
+						var dst_t_t_plus_one_trade_time_2_start_hour = t_t_plus_one_trade_time_2_start.substring(0,2);
+						var dst_t_t_plus_one_trade_time_2_end_hour = t_t_plus_one_trade_time_2_end.substring(0,2);
+						if (parseInt(dst_t_t_plus_one_trade_time_2_start_hour) > parseInt(dst_t_t_plus_one_trade_time_2_end_hour)) {
+							$("#dst_t_plus_one_trade_time_2_next_day").val("次交易日");
+						} else if (parseInt(dst_t_t_plus_one_trade_time_2_start_hour) < parseInt(dst_t_t_plus_one_trade_time_2_end_hour)){
+							$("#dst_t_plus_one_trade_time_2_next_day").val("");
+						} else {
+							var dst_t_t_plus_one_trade_time_2_start_minute = dst_t_t_plus_one_trade_time_2_start.substring(3);
+							var dst_t_t_plus_one_trade_time_2_end_minute = dst_t_t_plus_one_trade_time_2_end.substring(3);
+							if (parseInt(dst_t_t_plus_one_trade_time_2_start_minute) > parseInt(dst_t_t_plus_one_trade_time_2_end_minute)) {
+								$("#dst_t_plus_one_trade_time_2_next_day").val("次交易日");
+							} else {
+								$("#dst_t_plus_one_trade_time_2_next_day").val("");
+							}
+						}
+					}
+				</script>
+			</fieldset>
+		</div>
+	</div>
+
+	<script>
+	
+	$("#modify_local_trade_time_dialog").dialog({
+		autoOpen : false,
+		height : 400,
+		width : 620,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var t_trade_time_1_start = $("#t_trade_time_1_start").val();
+				var t_trade_time_1_end = $("#t_trade_time_1_end").val();
+				var t_trade_time_2_start = $("#t_trade_time_2_start").val();
+				var t_trade_time_2_end = $("#t_trade_time_2_end").val();
+				var t_trade_time_3_start = $("#t_trade_time_3_start").val();
+				var t_trade_time_3_end = $("#t_trade_time_3_end").val();
+				
+				var t_t_plus_one_trade_time_1_start = $("#t_t_plus_one_trade_time_1_start").val();
+				var t_t_plus_one_trade_time_1_end = $("#t_t_plus_one_trade_time_1_end").val();
+				var t_t_plus_one_trade_time_2_start = $("#t_t_plus_one_trade_time_2_start").val();
+				var t_t_plus_one_trade_time_2_end = $("#t_t_plus_one_trade_time_2_end").val();
+				
+				// DST
+				var dst_t_trade_time_1_start = $("#dst_t_trade_time_1_start").val();
+				var dst_t_trade_time_1_end = $("#dst_t_trade_time_1_end").val();
+				var dst_t_trade_time_2_start = $("#dst_t_trade_time_2_start").val();
+				var dst_t_trade_time_2_end = $("#dst_t_trade_time_2_end").val();
+				var dst_t_trade_time_3_start = $("#dst_t_trade_time_3_start").val();
+				var dst_t_trade_time_3_end = $("#dst_t_trade_time_3_end").val();
+				
+				var dst_t_t_plus_one_trade_time_1_start = $("#dst_t_t_plus_one_trade_time_1_start").val();
+				var dst_t_t_plus_one_trade_time_1_end = $("#dst_t_t_plus_one_trade_time_1_end").val();
+				var dst_t_t_plus_one_trade_time_2_start = $("#dst_t_t_plus_one_trade_time_2_start").val();
+				var dst_t_t_plus_one_trade_time_2_end = $("#dst_t_t_plus_one_trade_time_2_end").val();
+				
+				if ((t_trade_time_1_start == null || t_trade_time_1_start == '') && (t_trade_time_1_end != null && t_trade_time_1_end != '')) {
+					alert('T时段1时间填写不完整，请填写完整');
+					return;
+				}
+				if ((t_trade_time_1_end == null || t_trade_time_1_end == '') && (t_trade_time_1_start != null && t_trade_time_1_start != '')) {
+					alert('T时段1时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((t_trade_time_2_start == null || t_trade_time_2_start == '') && (t_trade_time_2_end != null && t_trade_time_2_end != '')) {
+					alert('T时段2时间填写不完整，请填写完整');
+					return;
+				}
+				if ((t_trade_time_2_end == null || t_trade_time_2_end == '') && (t_trade_time_2_start != null && t_trade_time_2_start != '')) {
+					alert('T时段2时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((t_trade_time_3_start == null || t_trade_time_3_start == '') && (t_trade_time_3_end != null && t_trade_time_3_end != '')) {
+					alert('T时段3时间填写不完整，请填写完整');
+					return;
+				}
+				if ((t_trade_time_3_end == null || t_trade_time_3_end == '') && (t_trade_time_3_start != null && t_trade_time_3_start != '')) {
+					alert('T时段3时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((t_t_plus_one_trade_time_1_start == null || t_t_plus_one_trade_time_1_start == '') && (t_t_plus_one_trade_time_1_end != null && t_t_plus_one_trade_time_1_end != '')) {
+					alert('T+1时段1时间填写不完整，请填写完整');
+					return;
+				}
+				if ((t_t_plus_one_trade_time_1_end == null || t_t_plus_one_trade_time_1_end == '') && (t_t_plus_one_trade_time_1_start != null && t_t_plus_one_trade_time_1_start != '')) {
+					alert('T+1时段1时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((t_t_plus_one_trade_time_2_start == null || t_t_plus_one_trade_time_2_start == '') && (t_t_plus_one_trade_time_2_end != null && t_t_plus_one_trade_time_2_end != '')) {
+					alert('T+1时段2时间填写不完整，请填写完整');
+					return;
+				}
+				if ((t_t_plus_one_trade_time_2_end == null || t_t_plus_one_trade_time_2_end == '') && (t_t_plus_one_trade_time_2_start != null && t_t_plus_one_trade_time_2_start != '')) {
+					alert('T+1时段2时间填写不完整，请填写完整');
+					return;
+				}
+				
+				// ----------------- DST --------------------
+				if ((dst_t_trade_time_1_start == null || dst_t_trade_time_1_start == '') && (dst_t_trade_time_1_end != null && dst_t_trade_time_1_end != '')) {
+					alert('夏令时T时段1时间填写不完整，请填写完整');
+					return;
+				}
+				if ((dst_t_trade_time_1_end == null || dst_t_trade_time_1_end == '') && (dst_t_trade_time_1_start != null && dst_t_trade_time_1_start != '')) {
+					alert('夏令时T时段1时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((dst_t_trade_time_2_start == null || dst_t_trade_time_2_start == '') && (dst_t_trade_time_2_end != null && dst_t_trade_time_2_end != '')) {
+					alert('夏令时T时段2时间填写不完整，请填写完整');
+					return;
+				}
+				if ((dst_t_trade_time_2_end == null || dst_t_trade_time_2_end == '') && (dst_t_trade_time_2_start != null && dst_t_trade_time_2_start != '')) {
+					alert('夏令时T时段2时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((dst_t_trade_time_3_start == null || dst_t_trade_time_3_start == '') && (dst_t_trade_time_3_end != null && dst_t_trade_time_3_end != '')) {
+					alert('夏令时T时段3时间填写不完整，请填写完整');
+					return;
+				}
+				if ((dst_t_trade_time_3_end == null || dst_t_trade_time_3_end == '') && (dst_t_trade_time_3_start != null && dst_t_trade_time_3_start != '')) {
+					alert('夏令时T时段3时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((dst_t_t_plus_one_trade_time_1_start == null || dst_t_t_plus_one_trade_time_1_start == '') && (dst_t_t_plus_one_trade_time_1_end != null && dst_t_t_plus_one_trade_time_1_end != '')) {
+					alert('夏令时T+1时段1时间填写不完整，请填写完整');
+					return;
+				}
+				if ((dst_t_t_plus_one_trade_time_1_end == null || dst_t_t_plus_one_trade_time_1_end == '') && (dst_t_t_plus_one_trade_time_1_start != null && dst_t_t_plus_one_trade_time_1_start != '')) {
+					alert('夏令时T+1时段1时间填写不完整，请填写完整');
+					return;
+				}
+				
+				if ((dst_t_t_plus_one_trade_time_2_start == null || dst_t_t_plus_one_trade_time_2_start == '') && (dst_t_t_plus_one_trade_time_2_end != null && dst_t_t_plus_one_trade_time_2_end != '')) {
+					alert('夏令时T+1时段2时间填写不完整，请填写完整');
+					return;
+				}
+				if ((dst_t_t_plus_one_trade_time_2_end == null || dst_t_t_plus_one_trade_time_2_end == '') && (dst_t_t_plus_one_trade_time_2_start != null && dst_t_t_plus_one_trade_time_2_start != '')) {
+					alert('夏令时T+1时段2时间填写不完整，请填写完整');
+					return;
+				}
+				
+				// check validation
+				/* if ((t_trade_time_1_start != null && t_trade_time_1_start != '') && (t_trade_time_1_end != null && t_trade_time_1_end != '')) {
+					if (isTimeSpanError(t_trade_time_1_start, t_trade_time_1_end)) {
+						alert('T时段1时间区间异常');
+					}
+				}
+				
+				if ((t_trade_time_2_start != null && t_trade_time_2_start != '') && (t_trade_time_2_end != null && t_trade_time_2_end != '')) {
+					if (isTimeSpanError(t_trade_time_2_start, t_trade_time_2_end)) {
+						alert('T时段2时间区间异常');
+					}
+				}
+				
+				if ((t_t_plus_one_trade_time_1_start != null && t_t_plus_one_trade_time_1_start != '') && (t_t_plus_one_trade_time_1_end != null && t_t_plus_one_trade_time_1_end != '')) {
+					if (isTimeSpanError(t_t_plus_one_trade_time_1_start, t_t_plus_one_trade_time_1_end)) {
+						alert('T+1时段1时间区间异常');
+					}
+				} */
+				
+				
+				updateTradeTimeConfig();
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	function showModifyLocalTradeTimeDialog(weekDayCN, weekDayEN) {
+		$("#week_day").val(weekDayCN);
+		$("#trade_time_weekday_en").val(weekDayEN)
+		
+		$("#modify_local_trade_time_dialog").dialog("option", "title", "编辑常规时间（当地时间）");
+		$("#modify_local_trade_time_dialog").dialog("open");
+		
+		//$("#dst_area").style.display="none";
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeConfigAdmin/getTradeTimeInfo",
+			data : {
+				sledCommodityId : ${sledCommodityId?c},
+				weekDay : weekDayEN,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				$("#t_trade_time_1_start").val(result.localTTradeTimeStart1);
+				$("#t_trade_time_1_end").val(result.localTTradeTimeEnd1);
+				$("#t_trade_time_2_start").val(result.localTTradeTimeStart2);
+				$("#t_trade_time_2_end").val(result.localTTradeTimeEnd2);
+				$("#t_trade_time_3_start").val(result.localTTradeTimeStart3);
+				$("#t_trade_time_3_end").val(result.localTTradeTimeEnd3);
+				
+				$("#t_t_plus_one_trade_time_1_start").val(result.localTPlusOneTradeTimeStart1);
+				$("#t_t_plus_one_trade_time_1_end").val(result.localTPlusOneTradeTimeEnd1);
+				$("#t_t_plus_one_trade_time_2_start").val(result.localTPlusOneTradeTimeStart2);
+				$("#t_t_plus_one_trade_time_2_end").val(result.localTPlusOneTradeTimeEnd2);
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function onShowDstArea(event) {
+		//alert('onShowDstArea');
+		
+		var weekDayEN = $("#trade_time_weekday_en").val()
+		
+		if($('#show_dst').is(':checked')) {
+			$("#dst_area").show();
+			
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledTradeTimeConfigAdmin/getTradeTimeInfo",
+				data : {
+					sledCommodityId : ${sledCommodityId?c},
+					weekDay : weekDayEN,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					console.log(result);
+					$("#dst_t_trade_time_1_start").val(result.localDstTTradeTimeStart1);
+					$("#dst_t_trade_time_1_end").val(result.localDstTTradeTimeEnd1);
+					$("#dst_t_trade_time_2_start").val(result.localDstTTradeTimeStart2);
+					$("#dst_t_trade_time_2_end").val(result.localDstTTradeTimeEnd2);
+					$("#dst_t_trade_time_3_start").val(result.localDstTTradeTimeStart3);
+					$("#dst_t_trade_time_3_end").val(result.localDstTTradeTimeEnd3);
+					
+					$("#dst_t_t_plus_one_trade_time_1_start").val(result.localDstTPlusOneTradeTimeStart1);
+					$("#dst_t_t_plus_one_trade_time_1_end").val(result.localDstTPlusOneTradeTimeEnd1);
+					$("#dst_t_t_plus_one_trade_time_2_start").val(result.localDstTPlusOneTradeTimeStart2);
+					$("#dst_t_t_plus_one_trade_time_2_end").val(result.localDstTPlusOneTradeTimeEnd2);
+				},
+				complete : function(data) {
+				}
+			});
+		} else {
+			$("#dst_area").hide();
+		}
+		
+	}
+	
+	function isTimeSpanError(timeSpanStart, timeSpanEnd) {
+		//var t_t_plus_one_trade_time_2_start = $("#t_t_plus_one_trade_time_2_start").val();
+		//var t_t_plus_one_trade_time_2_end = $("#t_t_plus_one_trade_time_2_end").val();
+		var start_hour = timeSpanStart.substring(0,2);
+		var end_hour = timeSpanEnd.substring(0,2);
+		
+		var start_hour_int = parseInt(start_hour);
+		var end_hour_int = parseInt(end_hour);
+		if (start_hour_int < end_hour_int) {
+			return 0;
+		} else if (start_hour_int > end_hour_int){
+			return 1;
+		} else {
+			var start_minute = timeSpanStart.substring(2);
+			var end_minute = timeSpanEnd.substring(2);
+			
+			var start_minute_int = parseInt(start_minute);
+			var end_minute_int = parseInt(end_minute);
+			if (start_minute_int < end_minute_int) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
+	
+	function updateTradeTimeConfig() {
+		var weekkay_en = $("#trade_time_weekday_en").val();
+		
+		var t_trade_time_1_start = $("#t_trade_time_1_start").val();
+		var t_trade_time_1_end = $("#t_trade_time_1_end").val();
+		var t_trade_time_2_start = $("#t_trade_time_2_start").val();
+		var t_trade_time_2_end = $("#t_trade_time_2_end").val();
+		var t_trade_time_3_start = $("#t_trade_time_3_start").val();
+		var t_trade_time_3_end = $("#t_trade_time_3_end").val();
+		
+		var t_t_plus_one_trade_time_1_start = $("#t_t_plus_one_trade_time_1_start").val();
+		var t_t_plus_one_trade_time_1_end = $("#t_t_plus_one_trade_time_1_end").val();
+		var t_t_plus_one_trade_time_2_start = $("#t_t_plus_one_trade_time_2_start").val();
+		var t_t_plus_one_trade_time_2_end = $("#t_t_plus_one_trade_time_2_end").val();
+		
+		// DST
+		var dst_t_trade_time_1_start = $("#dst_t_trade_time_1_start").val();
+		var dst_t_trade_time_1_end = $("#dst_t_trade_time_1_end").val();
+		var dst_t_trade_time_2_start = $("#dst_t_trade_time_2_start").val();
+		var dst_t_trade_time_2_end = $("#dst_t_trade_time_2_end").val();
+		var dst_t_trade_time_3_start = $("#dst_t_trade_time_3_start").val();
+		var dst_t_trade_time_3_end = $("#dst_t_trade_time_3_end").val();
+		
+		var dst_t_t_plus_one_trade_time_1_start = $("#dst_t_t_plus_one_trade_time_1_start").val();
+		var dst_t_t_plus_one_trade_time_1_end = $("#dst_t_t_plus_one_trade_time_1_end").val();
+		var dst_t_t_plus_one_trade_time_2_start = $("#dst_t_t_plus_one_trade_time_2_start").val();
+		var dst_t_t_plus_one_trade_time_2_end = $("#dst_t_t_plus_one_trade_time_2_end").val();
+		
+		// standardOrDst
+		//var standardOrDstGroup = $("[name='standardOrDst']").filter(":checked");
+		//var standardOrDst = standardOrDstGroup.attr("value");
+		var standardOrDst = 0;
+		if($('#show_dst').is(':checked')) {
+			standardOrDst = 1;
+		}
+		
+		var request = {
+			sledCommodityId : ${sledCommodityId?c},
+
+			weekDayEN : weekkay_en,
+			
+			standardOrDst : standardOrDst,
+			
+			localTTradeTimeStart1 : t_trade_time_1_start,
+			localTTradeTimeEnd1 : t_trade_time_1_end,
+			localTTradeTimeStart2 : t_trade_time_2_start,
+			localTTradeTimeEnd2 : t_trade_time_2_end,
+			localTTradeTimeStart3 : t_trade_time_3_start,
+			localTTradeTimeEnd3 : t_trade_time_3_end,
+
+			localTPlusOneTradeTimeStart1 : t_t_plus_one_trade_time_1_start,
+			localTPlusOneTradeTimeEnd1 : t_t_plus_one_trade_time_1_end,
+			localTPlusOneTradeTimeStart2 : t_t_plus_one_trade_time_2_start,
+			localTPlusOneTradeTimeEnd2 : t_t_plus_one_trade_time_2_end,
+			
+			// DST
+			localDstTTradeTimeStart1 : dst_t_trade_time_1_start,
+			localDstTTradeTimeEnd1 : dst_t_trade_time_1_end,
+			localDstTTradeTimeStart2 : dst_t_trade_time_2_start,
+			localDstTTradeTimeEnd2 : dst_t_trade_time_2_end,
+			localDstTTradeTimeStart3 : dst_t_trade_time_3_start,
+			localDstTTradeTimeEnd3 : dst_t_trade_time_3_end,
+
+			localDstTPlusOneTradeTimeStart1 : dst_t_t_plus_one_trade_time_1_start,
+			localDstTPlusOneTradeTimeEnd1 : dst_t_t_plus_one_trade_time_1_end,
+			localDstTPlusOneTradeTimeStart2 : dst_t_t_plus_one_trade_time_2_start,
+			localDstTPlusOneTradeTimeEnd2 : dst_t_t_plus_one_trade_time_2_end,
+		};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledTradeTimeConfigAdmin/updateTradeTimeConfig",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("编辑成功");
+					window.location.href=window.location.href='${base_url}/SledTradeTimeConfigAdmin/show?sledCommodityId=${sledCommodityId?c}&exchangeMic=${exchangeMic!""}&sledCommodityCnName=${sledCommodityCnName!""}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function unlockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeConfigAdmin/unlockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("退出编辑状态");
+					window.location.href='${base_url}/SledTradeTimeConfigAdmin/show?sledCommodityId=${sledCommodityId?c}&exchangeMic=${exchangeMic!""}&sledCommodityCnName=${sledCommodityCnName!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	function lockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeConfigAdmin/lockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("进入编辑状态");
+					window.location.href='${base_url}/SledTradeTimeConfigAdmin/show?sledCommodityId=${sledCommodityId?c}&exchangeMic=${exchangeMic!""}&sledCommodityCnName=${sledCommodityCnName!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>托管机调试页</title>
+		<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+		<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+		<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+		<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+		<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+		<style type="text/css">
+			.table td {
+				font-style: normal;
+				font-weight: normal;
+				text-align: center;
+			}
+			
+			.table th {
+				font-style: normal;
+				font-weight: normal;
+				text-align: center;
+				background: #F8FCFF;
+			}
+			
+			.bootstrap-table {
+				width: 100%;
+			}
+		</style>
+
+	</head>
+
+	<body>
+
+		<div id="vue-app-hosting-debug">
+
+			<!-- navigation bar -->
+			<div class="navigation_bar">
+				<div class="vertical_center">
+					<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+					<span class="navigation_bar_font_default">托管机调试</span>
+				</div>
+			</div>
+
+			<div class="col-md-12 general_margin_top">
+
+				<!-- title bar -->
+				<div class="sled_panel title_bar">
+					<div class="vertical_center">
+						<span class="general_margin_left title_font"><b>托管机调试</b></span>
+					</div>
+				</div>
+
+				<!-- content container -->
+				<div class="sled_panel general_margin_top" style="padding: 20px;">
+
+					<!-- content title bar -->
+					<div class="content_title_bar"></div>
+
+					<div>
+						<label>输入托管机内网IP:</label>
+						<input type=text class="input_conponent" style="width: 150px" v-model="hostingServerIp" value="${hostingIP!''}"/>
+					</div>
+					<div class="sled_panel general_margin_top" style="padding: 20px;">
+						<div>
+							<label>公司信息</label>
+							<button @click="queryCompanyInfo">查看</button>
+						</div>
+						<div v-cloak v-if="showCompanyInfo">
+							<div>
+								<span>托管机状态:</span><span>{{hostingInfo.status}}</span>
+								<span>(注：0 - 空机状态，等待初始化；1 - 正常使用状态；2 - 重置后，正在清理历史数据)</span>
+							</div>
+							<div>
+								<span>数据表版本号:</span><span>{{hostingInfo.tableVersion}}</span>
+							</div>
+							<div>
+								<span>托管子用户总数:</span><span>{{hostingInfo.subUserTotalCount}}</span>
+							</div>
+							<div>
+								<span>订阅总数:</span><span>{{hostingInfo.composeTotalCount}}</span>
+							</div>
+							<div>
+								<span>用户总数:</span><span>{{hostingInfo.onlineUserTotalCount}}</span>
+							</div>
+							<div>
+								<span>机器ID:</span><span>{{hostingInfo.machineId}}</span>
+							</div>
+							<div>
+								<span>交易环境:</span><span>{{hostingInfo.runningMode}}</span>
+								<span>(注：1 - 全天行情模式机；2 - 仿真模式；3 - 实盘模式)</span>
+							</div>
+						</div>
+					</div>
+					<div class="sled_panel general_margin_top" style="padding: 20px;">
+						<div>
+							<label>用户信息</label>
+							<button @click="queryCompanyUsers">查看</button>
+						</div>
+						<div v-cloak v-if="showCompanyUserInfo">
+							<table class="table table-bordered" style="border: 1px;">
+								<tr bgColor=#F8FCFF>
+									<th width="20">子用户ID</th>
+									<th width="50">用户名</th>
+									<th width="20">手机号</th>
+									<th width="50">昵称</th>
+									<th width="30">角色</th>
+									<th width="70">状态</th>
+								</tr>
+								<tr v-for="companyUser in companyUsers">
+									<td align="center">{{companyUser.subUserId}}</td>
+									<td align="center">{{companyUser.loginName}}</td>
+									<td align="center">{{companyUser.phone}}</td>
+									<td align="center">{{companyUser.nickName}}</td>
+									<td align="center">{{companyUser.userRoleValue}}</td>
+									<td align="center">{{companyUser.userState}}</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+					<div class="sled_panel general_margin_top" style="padding: 20px;">
+						<div>
+							<label>重置托管机</label>
+							<span>(慎用)</span>
+						</div>
+						<div>
+							<label>machineId:</label>
+							<input type=text class="input_conponent" style="width: 150px" v-model="machineId" />
+						</div>
+						<div>
+							<label>AES16KEY:</label>
+							<input type=text class="input_conponent" style="width: 150px" v-model="AES16KEY" />
+						</div>
+						<div>
+							<button @click="resetHosting">重置</button>
+						</div>
+					</div>
+					<div class="sled_panel general_margin_top" style="padding: 20px;">
+						<div>
+							<label>解绑托管机</label>
+						</div>
+						<div>
+							<span>去除托管机与公司服务组的关联关系（需要先重置托管机）</span>
+						</div>
+						<div>
+							<label>machineId:</label>
+							<input type=text class="input_conponent" style="width: 150px" v-model="unbindMachineId" />
+						</div>
+						<div>
+							<button @click="unbindHostingMachine">解绑</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<script>
+			window.hostingIP = "${hostingIP!''}";
+		</script>
+		<script type="text/javascript" src="${static_url}/js/sled.hosting.debug.js"></script>
+	</body>
+
+</html>

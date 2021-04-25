@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>订单商品管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+.gray-bg {
+ color: #bbbbbb;
+}
+.self_dialog_input_key {
+ width: 150px;
+}
+.self_dialog_input_long_value_key {
+ vertical-align: top;
+}
+.self_dialog_input_long_value {
+ height: 80px;
+}
+[v-cloak] { display: none }
+</style>
+
+</head>
+<body>
+	
+<div id="vue-app-order-commodity-admin">
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">订单商品管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>订单商品管理</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">类型：</span>
+					<select id="product_type" name="product_name" class="input_conponent" style="width: 150px" v-model="searchKeywords.productType">
+						<option value="">所有</option>
+						<option value="XCOIN">雪橇币</option>
+						<option value="BASIC_SPEC">基本型</option>
+						<option value="COMMON_SPEC">通用型</option>
+						<option value="ENHANCEMENT_SPEC">增强型</option>
+					</select>&nbsp;
+					<!--<span>币种：</span>-->
+					<!--<select id="product_currency_type" name="product_name" class="input_conponent" style="width: 150px" v-model="searchKeywords.currencyType">-->
+						<!--<option value="">ALL</option>-->
+						<!--<option value="XCOIN">XCOIN</option>-->
+						<!--<option value="RMB">RMB</option>-->
+					<!--</select>&nbsp;-->
+					<span>商品状态：</span>
+					<select id="product_purpose" name="product_name" class="input_conponent" style="width: 150px" v-model="searchKeywords.productStatus">
+						<option value="">所有</option>
+						<option value="VALID">有效</option>
+						<option value="INVALID">无效</option>
+					</select>&nbsp;
+					<button @click="search" class="sled_btn_enable">查询</button>
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add" class="sled_btn_enable" @click="showAddOrderProductDialog">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div v-cloak class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="10">商品ID</th>
+							<th width="50">名称</th>
+							<th width="30">类型</th>
+							<th width="30">商品目的</th>
+							<th width="30">商品目标规格</th>
+							<th width="100">描述</th>
+							<th width="25">库存数量</th>
+							<th width="20">单价</th>
+							<th width="20">币种</th>
+							<th width="20">商品状态</th>
+							<!--<th width="20">操作介入</th>-->
+							<!--<th width="50">操作</th>-->
+
+							<th width="20">雪橇币增量</th>
+							<th width="20">时间时长增量</th>
+							<th width="10">修改</th>
+						</tr>
+						<tr v-for="product in productPage">
+							<td align="center">
+								<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.productId}}</span>
+								<span v-else>{{product.productId}}</span>
+							</td>
+							<td align="center">
+								<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.name}}</span>
+								<span v-else>{{product.name}}</span>
+							</td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.typeCn}}</span>
+                                <span v-else>{{product.typeCn}}</span>
+                            </td>
+							<td align="center">
+								<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.purposeCn}}</span>
+								<span v-else>{{product.purposeCn}}</span>
+							</td>
+							<td align="center">
+								<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.purposeTypeCn}}</span>
+								<span v-else>{{product.purposeTypeCn}}</span>
+							</td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.description}}</span>
+                                <span v-else>{{product.description}}</span>
+                            </td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.inventoryQuantity}}</span>
+                                <span v-else>{{product.inventoryQuantity}}</span>
+                            </td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.price}}</span>
+                                <span v-else>{{product.price}}</span>
+                            </td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.currencyType}}</span>
+                                <span v-else>{{product.currencyType}}</span>
+                            </td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.statusCn}}</span>
+                                <span v-else>{{product.statusCn}}</span>
+                            </td>
+							<!--<td align="center">-->
+                                <!--<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.needOperator}}</span>-->
+                                <!--<span v-else>{{product.needOperator}}</span>-->
+                            <!--</td>-->
+							<!--<td align="center">-->
+                                <!--<span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.operation}}</span>-->
+                                <!--<span v-else>{{product.operation}}</span>-->
+                            <!--</td>-->
+
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.xCoinIncrement}}</span>
+                                <span v-else>{{product.xCoinIncrement}}</span>
+                            </td>
+							<td align="center">
+                                <span v-if="isProductInvalid(product.status)" class="gray-bg">{{product.timeIncrement}} 天</span>
+                                <span v-else>{{product.timeIncrement}} 天</span>
+                            </td>
+							<td align="center">
+                                <a v-if="isProductInvalid(product.status)" href="#"><img v-on:click="showModifyOrderProductDialog(product)" src="${static_url}/img/icon_edit.png"/></a>
+                                <a v-else href="#"><img v-on:click="showModifyOrderProductDialog(product)" src="${static_url}/img/icon_edit.png"/></a>
+                            </td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div v-cloak class="dialog" v-if="isAddOrderProductDialogShow">
+		<div class="dialog_container" style="width: 600px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>添加订单商品</b></span>
+				</div>
+			<div class="dialog_content">
+				<fieldset>
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">商品目的</label>
+					<select class="dialog_input_value input_conponent" id="add_product_purpose" name="add_product_purpose" v-model="newProduct.purpose">
+						<option value="NEW">新建</option>
+						<option value="UPGRADE">升级</option>
+						<option value="RECHARGE_XCOIN">充雪橇币</option>
+						<option value="RECHARGE_TIME">续费</option>
+						<option value="PERSONAL_NEW">个人版新建</option>
+						<option value="PERSONAL_RECHARGE_TIME">个人版续费</option>
+					</select>
+				</fieldset>
+				<fieldset v-if="newProduct.purpose !== 'RECHARGE_XCOIN' && newProduct.purpose !== 'PERSONAL_NEW' && newProduct.purpose !== 'PERSONAL_RECHARGE_TIME'">
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">类型</label>
+					<select class="dialog_input_value input_conponent" id="add_product_type" name="add_product_type" v-model="newProduct.type">
+						<!--<option value="XCOIN">雪橇币</option>-->
+						<option value="BASIC_SPEC">基本型</option>
+						<option value="COMMON_SPEC">通用型</option>
+						<option value="ENHANCEMENT_SPEC">增强型</option>
+					</select>
+				</fieldset>
+				<fieldset v-if="newProduct.purpose === 'UPGRADE'">
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">商品目标规格</label>
+					<select class="dialog_input_value input_conponent" id="add_purpose_type" name="add_purpose_type" v-model="newProduct.purposeType">
+						<!--<option value="XCOIN">雪橇币</option>-->
+						<option value="BASIC_SPEC">基本型</option>
+						<option value="COMMON_SPEC">通用型</option>
+						<option value="ENHANCEMENT_SPEC">增强型</option>
+					</select>
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">名称</label>
+					<input class="dialog_input_value input_conponent" type="text" name="add_name" id="add_name" v-model="newProduct.name">
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key self_dialog_input_key" for="field_file" v-if="newProduct.purpose === 'UPGRADE'">单价(￥/天)</label>
+					<label class="dialog_input_key self_dialog_input_key" for="field_file" v-else>单价(￥)</label>
+					<input class="dialog_input_value input_conponent" type="text" name="add_price" id="add_price" v-model="newProduct.price">
+				</fieldset>
+				<fieldset v-if="newProduct.purpose === 'RECHARGE_XCOIN'">
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">雪橇币增量</label>
+					<input class="dialog_input_value input_conponent" type="text" name="add_xcoin_increment" id="add_xcoin_increment" v-model="newProduct.xCoinIncrement">
+				</fieldset>
+				<fieldset v-if="newProduct.purpose === 'NEW' || newProduct.purpose === 'RECHARGE_TIME' || newProduct.purpose === 'PERSONAL_NEW' || newProduct.purpose === 'PERSONAL_RECHARGE_TIME'">
+					<label class="dialog_input_key self_dialog_input_key" for="field_file">时间时长增量（天）</label>
+					<input class="dialog_input_value input_conponent" type="text" name="add_time_increment" id="add_time_increment" v-model="newProduct.timeIncrement">
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key self_dialog_input_key self_dialog_input_long_value_key" for="field_file">描述</label>
+					<textarea class="dialog_input_value self_dialog_input_long_value self_dialog_input_long_value_key input_conponent" type="text" name="add_description" id="add_description" rows="3" cols="20" v-model="newProduct.description"></textarea>
+				</fieldset>
+			</div>
+			<div class="dialog_btn">
+				<button @click="addOrderProdcutConfirm" class="btn">确定</button>
+				<button @click="addOrderProdcutCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div v-cloak class="dialog" v-if="isModifyOrderProductDialogShow">
+		<div class="dialog_container" style="width: 600px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>修改订单商品</b></span>
+				</div>
+			<div class="dialog_content">
+				<fieldset>
+					<label class="dialog_input_key" for="field_file">商品ID</label>
+					<span class="dialog_input_value">{{modifyProduct.productId}}</span>
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key" for="field_file">名称</label>
+					<input class="dialog_input_value input_conponent" type="text" v-model="modifyProduct.name">
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key" for="field_file">库存数量</label>
+					<input class="dialog_input_value input_conponent" type="text" name="modify_inventory_quantity" id="modify_inventory_quantity" v-model="modifyProduct.inventoryQuantity">
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key" for="field_file">状态</label>
+					<select class="dialog_input_value input_conponent" id="modify_Product_status" name="modify_Product_status" v-model="modifyProduct.status">
+						<option value="VALID">有效</option>
+						<option value="INVALID">无效</option>
+					</select>
+				</fieldset>
+				<fieldset>
+					<label class="dialog_input_key self_dialog_input_long_value_key" for="field_file">描述</label>
+					<textarea class="dialog_input_value self_dialog_input_long_value self_dialog_input_long_value_key input_conponent" type="text" rows="3" cols="20" v-model="modifyProduct.description"></textarea>
+				</fieldset>
+			</div>
+			<div class="dialog_btn">
+				<button @click="modifyOrderProdcutConfirm" class="btn">确定</button>
+				<button @click="modifyOrderProdcutCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+</div>
+	<script type="text/javascript" src="${static_url}/js/sled.order.commodity.admin.js"></script>
+</body>
+</html>

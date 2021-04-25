@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>行情订阅管理</title>
+    <link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="${static_url}/css/bootstrap-table.min.css" />
+    <link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+    <!--<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">-->
+
+    <script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="${static_url}/js/bootstrap-table.min.js"></script>
+    <script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+    <!--<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+    <style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+
+ul {
+	display: flex;
+}
+
+ul li {
+	height: 53px;
+	background: transparent;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-size: 20px;
+	color: #909090;
+	cursor: pointer
+}
+
+ul li.active {
+	border-width: 10px;
+	border-bottom-style: solid;
+	border-radius: 0px;
+	border-color: #369EEF;
+	text-align: center;
+	text-decoration: none;
+	font-size: 23px;
+	color: #369EEF;
+}
+</style>
+
+</head>
+<body>
+
+<div id="vue-app-quotation-admin">
+
+    <!-- navigation bar -->
+    <div class="navigation_bar">
+        <div class="vertical_center">
+            <span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+            <span class="navigation_bar_font_default">外盘行情订阅设置</span>&nbsp;
+            <span class="navigation_bar_font_default">商品行情合约</span>
+        </div>
+    </div>
+
+    <div class="col-md-12 general_margin_top">
+
+        <!-- title bar -->
+        <div v-cloak class="sled_panel" style="height: 54px; width: 100%; background-color: white;">
+            <span class="general_margin_left title_font" style="height: 54px; line-height: 54px; float:left;"><b>外盘行情订阅设置</b></span>
+
+            <ul id="tab_ul"  style="margin-left: 200px;">
+                <li @click="gotoQuotationAccount">行情账号</li>
+                <li class="active">商品行情合约</li>
+            </ul>
+        </div>
+
+        <!-- <div > -->
+        <!-- content container -->
+        <div v-cloak class="sled_panel general_margin_top">
+
+            <!-- content title bar -->
+            <div class="content_title_bar">
+                <div class=" vertical_center">
+                    <span class="general_margin_left"><b>已添加币种</b></span>
+
+                    <div class="sled_align_rifht general_margin_right">
+                        <button id="btn-add" class="sled_btn_enable" @click="showAddCurrencyDialog">添加</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- table -->
+            <div class="general_bg_default">
+                <div class="list_container">
+                    <table class="table table-bordered" style="border: 1px;">
+                        <tr bgColor=#F8FCFF>
+                            <th width="50">货币编号</th>
+                            <th width="50">中文名称</th>
+                            <th width="50">英文名称</th>
+                            <th width="50">符号</th>
+                            <th width="50">是否为基准货币</th>
+                            <th width="50">编辑</th>
+                        </tr>
+                        <tr v-for="currency in currencyList">
+                            <td align="center">{{currency.currencyCode}}</td>
+                            <td align="center">{{currency.cnName}}</td>
+                            <td align="center">{{currency.enName}}</td>
+                            <td align="center">{{currency.symbol}}</td>
+                            <td align="center">{{currency.isBaseCurrency}}</td>
+
+                            <td align="center"><a href="#" @click="showEditCurrencyDialog(currency)"><img src="${static_url}/img/icon_edit.png"/></a></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <#include "page_nav_vue.html">
+        </div>
+        <!-- </div> -->
+    </div>
+
+    <div v-cloak class="dialog_page" v-if="isExchangeRatePageShow">
+        <!-- navigation bar -->
+        <div class="navigation_bar">
+            <div class="vertical_center">
+                <span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+                <span class="navigation_bar_font_default">汇率管理</span>
+            </div>
+        </div>
+
+        <div class="col-md-12 general_margin_top">
+
+            <!-- title bar -->
+            <div class="sled_panel" style="height: 54px; width: 100%; background-color: white;">
+                <span class="general_margin_left title_font" style="height: 54px; line-height: 54px; float:left;"><b>汇率管理</b></span>
+
+                <ul id="tab_ul"  style="margin-left: 200px;">
+                    <li @click="tabToggle(-1)" :class="{active:tabActive==-1}">货币</li>
+                    <li v-for="(exchangeRatePage,index) in exchangeRatePageList" @click="tabToggle(index)" :class="{active:tabActive==index}">
+                        汇率({{exchangeRatePage.baseCurrencyName}})
+                    </li>
+                </ul>
+            </div>
+
+            <!-- <div > -->
+            <!-- content container -->
+            <div v-cloak class="sled_panel general_margin_top">
+
+                <!-- content title bar -->
+                <div class="content_title_bar">
+                    <div class=" vertical_center">
+                    </div>
+                </div>
+
+                <!-- table -->
+                <div class="general_bg_default">
+                    <div class="list_container">
+                        <table class="table table-bordered" style="border: 1px;">
+                            <tr bgColor=#F8FCFF>
+                                <th width="50">汇率名</th>
+                                <th width="50">汇率值</th>
+                                <th width="50">编辑</th>
+                            </tr>
+                            <tr v-for="exchangeRate in selectedExchangeRatePage.exchangeList">
+                                <td align="center">{{exchangeRate.name}}</td>
+                                <td align="center">{{exchangeRate.exchangeRate}}</td>
+
+                                <td align="center"><a href="#" @click="showEditExchangeRateDialog(exchangeRate)"><img src="${static_url}/img/icon_edit.png"/></a></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog -->
+    <div v-cloak class="dialog" v-if="isAddCurrencyDialogShow">
+        <div class="dialog_container">
+            <div class="dialog_title">
+                <span style="text-align: center;"><b>添加币种</b></span>
+            </div>
+            <div class="dialog_content">
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">选择币种</label>
+                    <select class="dialog_input_value" id="add_currency_code" name="add_currency_code" v-model="newCurrency.currencyCode">
+                        <option value="USD">美元</option>
+                        <option value="CNY">人民币</option>
+                        <option value="EUR">欧元</option>
+                        <option value="GBP">英镑</option>
+                        <option value="HKD">港币</option>
+                        <option value="JPY">日元</option>
+                        <option value="KRW">韩元</option>
+                        <option value="MYR">马来西亚林吉特</option>
+                        <option value="SGD">新加坡元</option>
+                        <option value="THB">泰铢</option>
+                        <option value="AUD">澳元</option>
+                        <option value="CAD">加元</option>
+                        <option value="CHF">瑞士法郎</option>
+                        <option value="CNH">离岸人民币</option>
+                    </select>
+                </fieldset>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">英文名称</label>
+                    <input class="dialog_input_value" type="text" name="add_en_name" id="add_en_name" v-model="newCurrency.enName">
+                </fieldset>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">符号</label>
+                    <input class="dialog_input_value" type="text" name="add_symbol" id="add_symbol" v-model="newCurrency.symbol">
+                </fieldset>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">是否为基准货币</label>
+                    <select class="dialog_input_value" id="add_currency_code" name="add_currency_code" v-model="newCurrency.isBaseCurrency">
+                        <option value="true">是</option>
+                        <option value="false">否</option>
+                    </select>
+                </fieldset>
+            </div>
+            <div class="dialog_btn">
+                <button @click="addCurrencyDialogConfirm" class="btn">确定</button>
+                <button @click="addCurrencyDialogCancel" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-cloak class="dialog" v-if="isModifyCurrencyDialogSHow">
+        <div class="dialog_container" style="width: 500px;">
+            <div class="dialog_title">
+                <span style="text-align: center;"><b>编辑币种</b></span>
+            </div>
+            <div class="dialog_content">
+                <div>
+                    <label class="dialog_input_key">货币编号</label>&nbsp;&nbsp;&nbsp;<span>{{modifyCurrency.currencyCode}}</span>
+                </div>
+                <div>
+                    <label class="dialog_input_key">中文名称</label>&nbsp;&nbsp;&nbsp;<span style="color: orange;">{{modifyCurrency.cnName}}</span>
+                </div>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">英文名称</label>&nbsp;
+                    <input class="dialog_input_value" type="text" name="add_en_name" id="add_en_name" v-model="modifyCurrency.enName">
+                </fieldset>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">符号</label>&nbsp;
+                    <input class="dialog_input_value" type="text" name="add_symbol" id="add_symbol" v-model="modifyCurrency.symbol">
+                </fieldset>
+                <fieldset>
+                    <label class="dialog_input_key" for="field_file">是否为基准货币</label>&nbsp;
+                    <select class="dialog_input_value" id="add_currency_code" name="add_currency_code" v-model="modifyCurrency.isBaseCurrency">
+                        <option value="true">是</option>
+                        <option value="false">否</option>
+                    </select>
+                </fieldset>
+            </div>
+            <div class="dialog_btn">
+                <button @click="modifyCurrencyDialogConfirm" class="btn">确定</button>
+                <button @click="modifyCurrencyDialogCancel" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-cloak class="dialog" v-if="isModifyExchangeRateDialogSHow">
+        <div class="dialog_container" style="width: 400px;">
+            <div class="dialog_title">
+                <span style="text-align: center;"><b>编辑汇率</b></span>
+            </div>
+            <div class="dialog_content">
+                <div>
+                    <label>{{modifyExchangeRate.name}}</label>
+                </div>
+                <fieldset>
+                    <label for="field_file">汇率</label>&nbsp;
+                    <input class="dialog_input_value" type="text" name="modify_exchange_rate" id="modify_exchange_rate" v-model="modifyExchangeRate.exchangeRate">
+                </fieldset>
+            </div>
+            <div class="dialog_btn">
+                <button @click="modifyExchangeRateDialogConfirm" class="btn">确定</button>
+                <button @click="modifyExchangeRateDialogCancel" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript" src="${static_url}/js/sled.quotation.js"></script>
+</body>
+</html>

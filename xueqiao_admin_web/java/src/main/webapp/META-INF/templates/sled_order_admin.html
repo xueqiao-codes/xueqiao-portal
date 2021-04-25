@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>订单管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+<div id="vue-app-order-admin">
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">订单管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>订单管理</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">订单号：<input type=text id="order_id" class="input_conponent" style="width: 150px" v-model="searchKeywords.orderId"/></span>&nbsp;
+					<span>商品名：</span>
+					<select id="product_name" name="product_name" class="input_conponent" style="width: 150px" v-model="searchKeywords.productId">
+						<option value=""></option>
+						<option v-for="product in orderProductPage" v-bind:value="product.productId">
+							{{product.name}}
+						</option>
+					</select>&nbsp;
+					<span>公司ID：<input type=text id="company_id" class="input_conponent" style="width: 150px" v-model="searchKeywords.companyId"/></span>&nbsp;
+					<span>订单状态：</span>
+					<select id="order_status" name="order_status" class="input_conponent" style="width: 150px" v-model="searchKeywords.status">
+						<option value=""></option>
+						<option value="CREATED">CREATED</option>
+						<option value="PAY_SUCCESS">PAY_SUCCESS</option>
+						<option value="SYSTEM_PROCESSED">SYSTEM_PROCESSED</option>
+						<option value="EXPIRED">EXPIRED</option>
+						<option value="SUCCESS">SUCCESS</option>
+					</select>
+					<button @click="search" class="sled_btn_enable">查询</button>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div v-cloak class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="20">订单号</th>
+							<th width="50">商品名</th>
+							<th width="50">公司名称</th>
+							<th width="20">公司ID</th>
+							<th width="50">托管服务名称</th>
+							<th width="30">托管服务ID</th>
+							<th width="70">下单时间</th>
+							<th width="30">金额</th>
+							<th width="30">支付方式</th>
+							<th width="30">订单状态</th>
+							<th width="30">附属信息</th>
+							<th width="50">操作</th>
+							<th width="50">操作人</th>
+							<th width="30">订单详情</th>
+						</tr>
+						<tr v-for="order in orderPage">
+							<td align="center">{{order.orderId}}</td>
+							<td align="center">{{order.productName}}</td>
+							<td align="center">{{order.companyName}}</td>
+							<td align="center">{{order.companyId}}</td>
+							<td align="center">{{order.companyGroupName}}</td>
+							<td align="center">{{order.companyGroupId}}</td>
+							<td align="center">{{order.createTimestamp}}</td>
+							<td align="center">{{order.totalAmount}}</td>
+							
+							<td align="center">{{order.payType}}</td>
+							<td align="center">{{order.status}}</td>
+							<td align="center">{{order.extraInfo}}</td>
+
+							<td align="center" v-if="isNeedOperate(order)"><a href="#" @click="operateOrder(order)">{{order.operationString}}</a></td>
+							<td align="center" v-else>{{order.operationString}}</td>
+							<!-- for test 20180717 -->
+							<!--<td align="center"><a href="#" @click="operateOrder(order)">{{order.operation}}</a></td>-->
+							
+							<td align="center">{{order.operator}}</td>
+							<td align="center"><a href="#" @click="queryOrderDetail(order)">查看</a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<#include "page_nav_vue.html">
+		</div>
+	</div>
+	
+	<!-- Dialog -->
+	<div v-cloak class="dialog" v-if="isAllocateSpecDialogShow">
+		<div class="dialog_container">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>分配机器</b></span>
+			</div>
+			<div class="dialog_content">
+				<div style="padding-bottom: 5px;">
+					<span><b>订单信息</b></span>
+				</div>
+				<div>
+					<label class="dialog_input_key">新建服务规格：</label><span>{{allocateSpecInfo.currentType}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">新建服务时长：</label><span>{{allocateSpecInfo.timeIncrement}}天</span>
+				</div>
+				<div>&nbsp;</div>
+				<div style="padding-bottom: 5px;">
+					<span><b>选择机器</b></span>
+				</div>
+				<div>
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="50"></th>
+							<th width="50">实例ID/名称</th>
+							<th width="50">所在可用区</th>
+							<th width="100">IP地址</th>
+							<th width="50">运行状态</th>
+							<th width="50">网络类型</th>
+							<th width="50">配置</th>
+							<th width="50">付费方式</th>
+							<th width="50">到期时间</th>
+						</tr>
+						<tr v-for="hostingMachineInfo in allocateSpecInfo.hostingMachineInfoList">
+							<td align="center"><input type='radio' name='hostingMachineInfo' v-bind:value="hostingMachineInfo.machineId" v-model="allocateSpecInfo.machineId"/></td>
+							<td align="center">{{hostingMachineInfo.instanceId}}&nbsp;/&nbsp;{{hostingMachineInfo.machineHostname}}</td>
+							<td align="center">{{hostingMachineInfo.zoneId}}</td>
+							<td align="center">{{hostingMachineInfo.ipAddress}}</td>
+							<td align="center">{{hostingMachineInfo.runningStatus}}</td>
+							<td align="center">{{hostingMachineInfo.instanceNetworkType}}</td>
+							<td align="center">{{hostingMachineInfo.machineSpec}}</td>
+							<td align="center">{{hostingMachineInfo.instanceChargeType}}</td>
+							<td align="center">{{hostingMachineInfo.aliyunExpiredTime}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="dialog_btn">
+				<button @click="allocateSpecDialogConfirm" class="btn">确定</button>
+				<button @click="allocateSpecDialogCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+	
+	<div v-cloak class="dialog" v-if="isUpgradeSpecDialogShow">
+		<div class="dialog_container" style="width: 500px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>变更规格</b></span>
+			</div>
+			<div class="dialog_content">
+				<div style="padding-bottom: 5px;">
+					<span><b>订单信息</b></span>
+				</div>
+				<div>
+					<label class="dialog_input_key">当前服务规格：</label><span>{{upgradeSpecInfo.currentType}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">需要变更至：</label><span style="color: orange;">{{upgradeSpecInfo.purposeType}}</span>
+				</div>
+				<div>&nbsp;</div>
+				<div style="padding-bottom: 5px;">
+					<span style="padding-"><b>需要变更的机器</b></span>
+				</div>
+				<div>
+					<label class="dialog_input_key">服务器ID：</label><span>{{upgradeSpecInfo.machineId}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">当前机器配置：</label><span>{{upgradeSpecInfo.machineSpec}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">需要变量至：</label><span style="color: orange;">{{upgradeSpecInfo.description}}</span>
+				</div>
+				
+				<div style="padding-top: 30px;">
+					<span style="color: orange;">注：确定变量前请在阿里云完成相应变更操作！</span>
+				</div>
+			</div>
+			<div class="dialog_btn">
+				<button @click="upgradeSpecDialogConfirm" class="btn">确定</button>
+				<button @click="upgradeSpecDialogCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+	
+	<div v-cloak class="dialog" v-if="isOrderDetailDialogShow">
+		<div class="dialog_container" style="width: 600px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>订单详情</b></span>
+			</div>
+			<div class="dialog_content">
+				<div style="padding-bottom: 5px;">
+					<span><b>基本信息</b></span>
+				</div>
+				<div>
+					<label class="dialog_input_key">订单号：</label> <span>{{orderDetail.orderId}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">商品名：</label><span>{{orderDetail.productName}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">公司ID：</label><span>{{orderDetail.companyId}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">公司名：</label><span>{{orderDetail.companyName}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">托管服务ID：</label><span>{{orderDetail.companyGroupId}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">托管服务名：</label><span>{{orderDetail.companyGroupName}}</span>
+				</div>
+				<div>&nbsp;</div>
+				<div style="padding-bottom: 5px;">
+					<span><b>支付信息</b></span>
+				</div>
+				<div>
+					<label class="dialog_input_key">支付方式：</label><span>{{orderDetail.payType}}</span>
+				</div>
+				<div>
+					<label class="dialog_input_key">支付订单号：</label><span>{{orderDetail.thirdPartyOrderNo}}</span>
+				</div>
+				<div>&nbsp;</div>
+				<div style="padding-bottom: 5px;">
+					<span><b>状态变量信息</b></span>
+				</div>
+				<div>
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="50">时间</th>
+							<th width="50">内容</th>
+						</tr>
+						<tr v-for="orderFlow in orderDetailOrderFlow">
+							<td align="center">{{orderFlow.createTimestamp}}</td>
+							<td align="center">{{orderFlow.description}}</td>
+						</tr>
+					</table>
+				</div>
+				
+			</div>
+			<div class="dialog_btn">
+				<button @click="orderDetailDialogConfirm" class="btn">确定</button>
+			</div>
+		</div>
+	</div>
+	
+</div>	
+<script type="text/javascript" src="${static_url}/js/sled.order.admin.js"></script>
+</body>
+</html>

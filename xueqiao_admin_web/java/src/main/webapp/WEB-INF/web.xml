@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+	<display-name>Xueqiao Admin Web</display-name>
+
+	<listener>
+		<listener-class>
+			com.longsheng.xueqiao.admin.listener.OwlWebContextListener
+		</listener-class>
+	</listener>
+
+	<!-- for web -->
+	<servlet>
+		<servlet-name>Index</servlet-name>
+		<servlet-class>org.soldier.platform.web_framework.Index</servlet-class>
+		<init-param>
+			<param-name>IndexName</param-name>
+			<param-value>admin</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ControllerPackage</param-name>
+			<param-value>com.longsheng.xueqiao.admin.web.controller</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Index</servlet-name>
+		<url-pattern>/admin/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>UploadCommodityMappingFile</servlet-name>
+		<servlet-class>com.longsheng.xueqiao.admin.web.controller.UploadCommodityMappingFile</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadCommodityMappingFile</servlet-name>
+		<url-pattern>/UploadCommodityMappingFile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AliPayServlet</servlet-name>
+		<display-name>AliPay Servlet</display-name>
+		<servlet-class>
+			com.longsheng.xueqiao.admin.web.servlet.AliPayServlet
+		</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>AliPayServlet</servlet-name>
+		<url-pattern>/alipaynotify</url-pattern>
+	</servlet-mapping>
+
+</web-app>

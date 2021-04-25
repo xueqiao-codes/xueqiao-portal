@@ -1,0 +1,65 @@
+.breadcrumb {
+  height: 14px;
+  background-color: white;
+  justify-items: center;
+  padding: 10px;
+}
+.sm-item {
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.sm-item-key {
+  text-align: left;
+  margin-left: 50px;
+  width: 150px;
+}
+.sm-item-auto-value {
+  text-align: left;
+}
+.sm-item-value {
+  text-align: left;
+  /* width: 300px; */
+}
+.sm-item-multi-value {
+  text-align: left;
+  width: 500px;
+  display: flex;
+}
+.sm-item-multi-inner-value {
+  padding-right: 10px;
+}
+.lg-item {
+  display: flex;
+  /* align-items: center; */
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.lg-item-key {
+  text-align: left;
+  margin-left: 50px;
+  margin-top: 7px;
+  width: 150px;
+}
+.lg-item-multi-line-value{
+  text-align: left;
+  width: 800px;
+  margin-bottom: 5px;
+}
+.item-divider {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.td-item {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.help-badge{
+  padding-left: 5px;
+  padding-right: 5px;
+}

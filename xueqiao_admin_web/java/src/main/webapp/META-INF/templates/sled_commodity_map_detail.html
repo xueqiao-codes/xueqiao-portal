@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>易盛映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledBrokerAdmin/show">券商管理</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledBrokerAccessAdmin/show?brokerId=${brokerId?c}&platform=${platform}&brokerCnName=${brokerCnName}">${brokerCnName}&nbsp;${platform}接入详情</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_default">${brokerCnName!""}&nbsp;映射列表</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode"><a href="#">进入编辑状态</a></div>
+		</div>
+	</div>
+	
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>${brokerCnName!""}&nbsp;映射列表</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+						<thead>
+							<tr>
+								<th data-colspan="3">雪橇</th>
+								<th data-colspan="4">易盛9.0</th>
+								<th data-colspan="4">易盛3.0</th>
+							</tr>
+							<tr>
+								<th width="50">交易所</th>
+								<th width="50">商品类型</th>
+								<th width="50">商品</th>
+								
+								<th width="50">交易所</th>
+								<th width="50">商品类型</th>
+								<th width="50">商品</th>
+								<th width="50">价格比例</th>
+								
+								<th width="50">交易所</th>
+								<th width="50">商品类型</th>
+								<th width="50">商品</th>
+								<th width="50">价格比例</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if commodityMappingInfoList??>
+								<#list commodityMappingInfoList as commodityMappingInfo>
+									<tr>
+										<td>${commodityMappingInfo.sledExchangeMic!""}</td>
+										<td>${commodityMappingInfo.sledCommodityType!""}</td>
+										<td>${commodityMappingInfo.sledCommodityCode!""}</td>
+										
+										<td>${commodityMappingInfo.es9Exchange!""}</td>
+										<td>${commodityMappingInfo.es9CommodityType!""}</td>
+										<td>${commodityMappingInfo.es9CommodityCode!""}</td>
+										<td>${commodityMappingInfo.es9MoneyRatio!""}</td>
+										
+										<td>${commodityMappingInfo.es3Exchange!""}</td>
+										<td>${commodityMappingInfo.es3CommodityType!""}</td>
+										<td>${commodityMappingInfo.es3CommodityCode!""}</td>
+										<td>${commodityMappingInfo.es3MoneyRatio!""}</td>
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+</body>
+</html>

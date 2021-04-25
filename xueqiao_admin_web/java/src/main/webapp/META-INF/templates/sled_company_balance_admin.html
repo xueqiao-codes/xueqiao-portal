@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>公司余额</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<style type="text/css">
+table{
+table-layout: fixed;
+word-break: break-all;
+word-wrap: break-word;
+}
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+
+</style>
+
+</head>
+<body>
+<div id="vue-company-balance-admin">
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledCompanyAdmin/show">公司管理&nbsp;&nbsp;${companyName}</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_default">公司余额</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>公司余额</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left"><b>余额：</b></span>&nbsp;
+					<span><b>{{xCoinBalance}}</b></span>&nbsp;
+					<span><b>雪橇币</b></span>
+
+					<a class="general_margin_left_btn_gap" href="#" @click="showModifyBalanceDialog(1)"><span><b>增加</b></span></a>
+					<a class="general_margin_left_btn_gap" href="#" @click="showModifyBalanceDialog(-1)"><span><b>减扣</b></span></a>
+
+				</div>
+			</div>
+			
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left"><b>变更记录</b></span>
+				</div>
+			</div>
+			<!-- table -->
+			<div v-cloak class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="100">变更时间</th>
+							<th width="50">变量类型</th>
+							<th width="50">变更数额</th>
+							<th width="50">途径</th>
+							<th width="50">流水单号</th>
+							<th width="100">备注</th>
+							<th width="50">操作人</th>
+							<th width="10">编辑</th>
+						</tr>
+						<tr v-for="balanceAlteration in balanceAlterationPage">
+							<td>{{balanceAlteration.createTimestamp}}</td>
+							<td>{{balanceAlteration.operationType}}</td>
+							<td>{{balanceAlteration.alerationXCoin}}</td>
+							<td>{{balanceAlteration.alterationChannel}}</td>
+							<td>{{balanceAlteration.thirdPartyTradeNo}}</td>
+							<td>{{balanceAlteration.description}}</td>
+							<td>{{balanceAlteration.operator}}</td>
+							<td><a href="#" @click="showModifyAlterRecordDialog(balanceAlteration)"><img src="${static_url}/img/icon_edit.png"/></a></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<#include "page_nav_vue.html">
+		</div>
+	</div>
+	
+	<!-- alter balance dialog -->
+	<div v-cloak class="dialog" v-if="isShowAlterBalanceDialog">
+	<!--<div class="dialog">-->
+		<div class="dialog_container" style="width: 500px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>{{alterBalanceDialogTitle}}</b></span>
+			</div>
+			<div class="dialog_content">
+				<div>
+					<label class="dialog_input_key">变量数额：</label>
+					<input class="dialog_input_value" type="text" v-model="alterBalanceInfo.alerationXCoin">
+				</div>
+				<div>
+					<label class="dialog_input_key">途径：</label>
+					<select class="dialog_input_value" v-model="alterBalanceInfo.alterationChannel">
+						<option value="NONE">无</option>
+						<option value="ALIPAY">支付宝</option>
+						<option value="WXPAY">微信支付</option>
+						<option value="BANK_TRANSFER">银行转账</option>
+					</select>
+				</div>
+				<div>
+					<label class="dialog_input_key">流水单号：</label>
+					<input class="dialog_input_value" type="text" v-model="alterBalanceInfo.thirdPartyTradeNo">
+				</div>
+				<div>
+					<label class="dialog_input_key" style="display: inline-block; vertical-align: top;">备注：</label>
+					<textarea rows="3" cols="30" class="dialog_input_value" style="height: 60px;" v-model="alterBalanceInfo.description"></textarea>
+				</div>				
+			</div>
+			<div class="dialog_btn">
+				<button @click="confirmAlterBalance" class="btn">确定</button>
+				<button @click="cancelAlterBalance" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+	
+	<!-- modity alter balance record dialog -->
+	<div v-cloak class="dialog" v-if="isShowModityAlterRecordDialog">
+	<!--<div class="dialog">-->
+		<div class="dialog_container" style="width: 500px;">
+			<div class="dialog_title">
+					<span style="text-align: center;"><b>编辑</b></span>
+			</div>
+			<div class="dialog_content">
+				<div>
+					<label class="dialog_input_key" style="display: inline-block; vertical-align: top;">备注：</label>
+					<textarea rows="3" cols="30" class="dialog_input_value" style="height: 60px;" v-model="modifyAlterRecordInfo.description"></textarea>
+				</div>				
+			</div>
+			<div class="dialog_btn">
+				<button @click="confirmModifyAlterRecord" class="btn">确定</button>
+				<button @click="cancelModifyAlterRecord" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+	
+</div>	
+<script>
+	window.companyId = ${companyId?c};
+</script>
+<script type="text/javascript" src="${static_url}/js/sled.company.balance.admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>券商管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+</head>
+<body>
+	<div class="col-md-12">
+		<span>当前位置：</span>
+		<a href="${base_url}/SledBrokerAdmin/show"><span>券商列表</span></a>
+		<span>&nbsp;>&nbsp;${brokerCnName}&nbsp;${brokerAccessEntry.platform}接入详情</span>
+		<div style="height: 20px;"></div>
+	</div>
+	
+	<nav class="nav navbar-default" role="navigation">
+		<div class="collapse navbar-collapse">
+			<div class="nav navbar-nav" style="font-size: 25px;">${brokerCnName}&nbsp;&nbsp;&nbsp;${brokerAccessEntry.platform}接入详情</div>
+		</div>
+	</nav>
+	
+	<div style="height: 10px;"></div>
+	
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<#if (platform!"") == "CTP">
+			<div class="panel-heading">
+				<#if brokerAccessEntry.brokerAccessEntryList??>
+				<#list brokerAccessEntry.brokerAccessEntryList as simpleBrokerAccessEntry>
+					<a href="${base_url}/SledBrokerAccessAdmin/show?entryId=${simpleBrokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}"><span <#if (simpleBrokerAccessEntry.entryId == brokerAccessEntry.entryId)>class="label label-default"</#if>><#if simpleBrokerAccessEntry.accessName?default("")?trim?length gt 1>${simpleBrokerAccessEntry.accessName}<#else>主席</#if></span></a>&nbsp;&nbsp;
+				</#list>
+				</#if>
+				<div class="navbar-right">
+					<a href="javascript:showAddBrokerAccessEntryDialog();"><span class="badge">添加席</span></a>
+					<a href="javascript:showModifyAccessNameDialog();"><span class="badge">编辑当前席名称</span></a>
+					<a href="javascript:removeCurrentAccessEntry();"><span class="badge">删除当前席</span></a>&nbsp;&nbsp;&nbsp;
+				</div>
+			</div>
+			</#if>
+			<div class="panel-body">
+			<div class="col-md-12">
+				<div style="float:left;height:40px;vertical-align:middle;">
+					<span>接入状态：</span><span>${brokerAccessEntry.status}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<span>使用状态：</span><span>${brokerAccessEntry.workingStatus}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<span>技术平台环境：</span><a href="javascript:showTechPlatformEnvDialog();"><span class="badge">${brokerAccessEntry.techPlatformEnv}</span></a>
+				</div>
+				<div style="float:right;height:40px;vertical-align:middle;">
+					<a href="javascript:validate();"><span class="badge">验证</span></a>
+					<a href="javascript:sync();"><span class="badge">同步</span></a>
+					<a href="javascript:recover();"><span class="badge">恢复到线上数据</span></a>
+				</div>
+			</div>
+			
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<span>交易地址</span>
+						<div class="navbar-right">
+							<a href="javascript:showAddAccessAddressDialog('type_trade');"><span class="badge">添加</span></a>&nbsp;&nbsp;&nbsp;
+						</div>
+					</div>
+					<div class="list_container">
+						<table class="table table-striped table-bordered" style="border: 1px;">
+							<tr>
+								<th class="table_nav_key" width="200">地址</th>
+								<th class="table_nav_key" width="50">删除</th>
+							</tr>
+							<#if brokerAccessEntry.tradeAddressList??>
+							<#list brokerAccessEntry.tradeAddressList as tradeAddress>
+							<tr>
+								<td align="center">${tradeAddress.address}:${tradeAddress.port?c}</td>
+								<td align="center"><a href="javascript:showRemoveAccessAddressDialog('type_trade', '${tradeAddress.address}', '${tradeAddress.port?c}');"><span class="glyphicon glyphicon-remove"></span></a></td>
+							</tr>
+							</#list>
+							</#if>
+						</table>
+					</div>
+				</div>
+				
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<span>行情地址</span>
+						<div class="navbar-right">
+							<a href="javascript:showAddAccessAddressDialog('type_quota');"><span class="badge">添加</span></a>&nbsp;&nbsp;&nbsp;
+						</div>
+					</div>
+					<div class="list_container">
+						<table class="table table-striped table-bordered" style="border: 1px;">
+							<tr>
+								<th class="table_nav_key" width="200">地址</th>
+								<th class="table_nav_key" width="50">删除</th>
+							</tr>
+							<#if brokerAccessEntry.quotaAddressList??>
+							<#list brokerAccessEntry.quotaAddressList as quotaAddress>
+							<tr>
+								<td align="center">${quotaAddress.address}:${quotaAddress.port?c}</td>
+								<td align="center"><a href="javascript:showRemoveAccessAddressDialog('type_quota', '${quotaAddress.address}', '${quotaAddress.port?c}');"><span class="glyphicon glyphicon-remove"></span></a></td>
+							</tr>
+							</#list>
+							</#if>
+						</table>
+					</div>
+				</div>
+			</div>
+	
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<span>附加信息</span>
+						<div class="navbar-right">
+							<a href="javascript:showAddCustomInfoDialog();"><span class="badge">添加</span></a>&nbsp;&nbsp;&nbsp;
+						</div>
+					</div>
+					<div class="list_container">
+						<table class="table table-striped table-bordered" style="border: 1px;">
+							<tr>
+								<th class="table_nav_key" width="100">Key</th>
+								<th class="table_nav_key" width="100">Value</th>
+								<th class="table_nav_key" width="50">编辑</th>
+								<th class="table_nav_key" width="50">删除</th>
+							</tr>
+							<#if brokerAccessEntry.customInfoMap??>
+							<#list brokerAccessEntry.customInfoMap?keys as key>
+							<tr>
+								<td align="center">${key}</td>
+								<td align="center">${brokerAccessEntry.customInfoMap[key]}</td>
+								<td align="center"><a href="javascript:showModifyCustomInfoDialog('${key}', '${brokerAccessEntry.customInfoMap[key]}');"><span class="glyphicon glyphicon-edit"></span></a></td>
+								<td align="center"><a href="javascript:showRemoveCustomInfoDialog('${key}', '${brokerAccessEntry.customInfoMap[key]}');"><span class="glyphicon glyphicon-remove"></span></a></td>
+							</tr>
+							</#list>
+							</#if>
+						</table>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div id="access_address_dialog">
+		<input type="hidden" name="dialog_type" id="dialog_type">
+		<input type="hidden" name="entry_id" id="entry_id" value=${brokerAccessEntry.entryId?c}>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">IP：</label>
+			<input class="dialog_input_value" type="text" name="access_address_ip" id="access_address_ip" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">端口：</label>
+			<input class="dialog_input_value" type="text" name="access_address_port" id="access_address_port" 
+			onKeyUp="this.value=this.value.replace(/\D/g,'');">
+		</fieldset>
+	</div>
+	
+	<div id="custom_info_map_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">Key：</label>
+			<select id="custom_info_key" name="custom_info_key" class="dialog_input_value">
+				<#if (platform!"") == "CTP">
+				<option value="BROKER_ID_INFO">BROKER_ID_INFO</option>
+				</#if>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">Value：</label>
+			<input class="dialog_input_value" type="text" name="custom_info_value" id="custom_info_value" >
+		</fieldset>
+	</div>
+	
+	<div id="modify_custom_info_map_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">Key：</label>
+			<input class="dialog_input_value_readonly" type="text" name="modify_custom_info_key" id="modify_custom_info_key" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">Value：</label>
+			<input class="dialog_input_value" type="text" name="modify_custom_info_value" id="modify_custom_info_value" >
+		</fieldset>
+	</div>
+	
+	<div id="tech_platform_env_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">Key：</label>
+			<select id="tech_platform_env" name="tech_platform_env" class="dialog_input_value">
+				<option value="NONE">NONE</option>
+				<option value="REAL">REAL</option>
+				<option value="SIM">SIM</option>
+			</select>
+		</fieldset>
+	</div>
+	
+	<div id="modify_access_name_dialog">
+		<input type="hidden" name="access_name_type" id="access_name_type">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">当前席名称：</label>
+			<input class="dialog_input_value" type="text" name="access_name" id="access_name" >
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#tech_platform_env_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				updateTechPlatformEnv();
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#modify_access_name_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var access_name_type = $("#access_name_type").val();
+				var access_name = $("#access_name").val();
+				
+				if (access_name == null || access_name == undefined || access_name == '') {
+					alert("请输入当前席名称");
+					return;
+				}
+				
+				if (access_name_type == "add_broker_access") {
+					addBrokerAccessEntry(access_name);
+				} else {
+					updateAccessName();
+				}
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#access_address_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var access_address_ip = $("#access_address_ip").val();
+				var access_address_port = $("#access_address_port").val();
+				
+				if (access_address_ip == null || access_address_ip == undefined || access_address_ip == '') {
+					alert('请输入IP');
+					return;
+				}
+				if (access_address_port == null || access_address_port == undefined || access_address_port == '') {
+					alert('请输入端口');
+					return;
+				}
+				
+				addAccessAddress();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#custom_info_map_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var custom_info_key = $("#custom_info_key").val();
+				var custom_info_value = $("#custom_info_value").val();
+				
+				if (custom_info_key == null || custom_info_key == undefined || custom_info_key == '') {
+					alert(${platform} + "不支持附加信息");
+					return;
+				}
+				if (custom_info_value == null || custom_info_value == undefined || custom_info_value == '') {
+					alert('请输入值');
+					return;
+				}
+				
+				addCustomInfo();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#modify_custom_info_map_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var custom_info_key = $("#modify_custom_info_key").val();
+				var custom_info_value = $("#modify_custom_info_value").val();
+				
+				if (custom_info_key == null || custom_info_key == undefined || custom_info_key == '') {
+					alert(${platform} + "不支持附加信息");
+					return;
+				}
+				if (custom_info_value == null || custom_info_value == undefined || custom_info_value == '') {
+					alert('请输入值');
+					return;
+				}
+				
+				modifyCustomInfo();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	function removeCurrentAccessEntry() {
+		if (confirm("确认删除${brokerAccessEntry.accessName}？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledBrokerAccessAdmin/removeAccessEntry",
+				data : {
+					entryId : ${brokerAccessEntry.entryId?c},
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledBrokerAccessAdmin/show?brokerId=${brokerAccessEntry.brokerId?c}&platform=${brokerAccessEntry.platform}&brokerCnName=${brokerCnName}';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function validate() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/validate",
+			data : {
+				entryId : ${brokerAccessEntry.entryId?c},
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("验证完成");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(result.errorCode + ":" + result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function sync() {
+		if (confirm("同步后将启用，是否同步和启用？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledBrokerAccessAdmin/sync",
+				data : {
+					entryId : ${brokerAccessEntry.entryId?c},
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("同步成功");
+					} else {
+						alert(result.errorCode + ":" + result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function recover() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/recover",
+			data : {
+				entryId : ${brokerAccessEntry.entryId?c},
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("恢复成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(result.errorCode + ":" + result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function updateTechPlatformEnv() {
+		var tech_platform_env = $("#tech_platform_env").val();
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/updateTechPlatformEnv",
+			data : {
+				entryId : ${brokerAccessEntry.entryId?c},
+				techPlatformEnv : tech_platform_env,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("修改成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function showTechPlatformEnvDialog() {
+		
+		$("#tech_platform_env").val('${brokerAccessEntry.techPlatformEnv}');
+		
+		$("#tech_platform_env_dialog").dialog("option", "title", "修改技术平台环境");
+		$("#tech_platform_env_dialog").dialog("open");
+	}
+	
+	function showAddBrokerAccessEntryDialog() {
+		$("#access_name").val("");
+		$("#access_name_type").val("add_broker_access");
+		
+		$("#modify_access_name_dialog").dialog("option", "title", "输入席名称");
+		$("#modify_access_name_dialog").dialog("open");
+	}
+	
+	function showModifyAccessNameDialog() {
+		$("#access_name").val('${brokerAccessEntry.accessName}');
+		$("#access_name_type").val("modify_access_name");
+		
+		$("#modify_access_name_dialog").dialog("option", "title", "编辑当前席名称");
+		$("#modify_access_name_dialog").dialog("open");
+	}
+	
+	function showAddAccessAddressDialog(type) {
+		$("#dialog_type").val(type);
+		if (type == "type_trade") {
+			$("#access_address_dialog").dialog("option", "title", "添加交易地址");
+		} else if (type == "type_quota"){
+			$("#access_address_dialog").dialog("option", "title", "添加行情地址");
+		}
+		$("#access_address_dialog").dialog("open");
+	}
+	
+	function showAddCustomInfoDialog() {
+		$("#custom_info_key").val("");
+		$("#custom_info_value").val("");
+		
+		$("#custom_info_map_dialog").dialog("option", "title", "添加附加信息");
+		$("#custom_info_map_dialog").dialog("open");
+	}
+	
+	function showModifyCustomInfoDialog(CustomInfoKey, CustomInfoValue) {
+		$("#modify_custom_info_key").val(CustomInfoKey);
+		$("#modify_custom_info_value").val(CustomInfoValue);
+		
+		$("#modify_custom_info_map_dialog").dialog("option", "title", "修改附加信息");
+		$("#modify_custom_info_map_dialog").dialog("open");
+	}
+	
+	function showRemoveAccessAddressDialog(type, accessAddressIp, accessAddressPort) {
+		
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledBrokerAccessAdmin/removeAccessAddress",
+				data : {
+					entryId : ${brokerAccessEntry.entryId?c},
+					addressType : type,
+					accessAddressIp : accessAddressIp,
+					accessAddressPort : accessAddressPort,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function showRemoveCustomInfoDialog(customInfoKey, customInfoValue) {
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledBrokerAccessAdmin/removeCustomInfo",
+				data : {
+					entryId : ${brokerAccessEntry.entryId?c},
+					customInfoKey : customInfoKey,
+					customInfoValue : customInfoValue,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function updateAccessName() {
+		
+		var access_name = $("#access_name").val();
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/updateAccessName",
+			data : {
+				entryId : ${brokerAccessEntry.entryId?c},
+				accessName : access_name,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("修改成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function addBrokerAccessEntry(access_name) {
+		if (confirm("确认添加？")) {
+			
+			var platform = "${brokerAccessEntry.platform}";
+			
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledBrokerAccessAdmin/addBrokerAccessEntry",
+				data : {
+					brokerId : ${brokerAccessEntry.brokerId?c},
+					platform : platform,
+					accessName : access_name,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("添加成功");
+						window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function addAccessAddress() {
+		var entryId = $("#entry_id").val();
+		var type = $("#dialog_type").val();
+		var access_address_ip = $("#access_address_ip").val();
+		var access_address_port = $("#access_address_port").val();
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/addAccessAddress",
+			data : {
+				entryId : entryId,
+				addressType : type,
+				accessAddressIp : access_address_ip,
+				accessAddressPort : access_address_port,
+			},
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("操作成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function addCustomInfo() {
+		var entryId = ${brokerAccessEntry.entryId?c};
+		var custom_info_key = $("#custom_info_key").val();
+		var custom_info_value = $("#custom_info_value").val();
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/addCustomInfo",
+			data : {
+				entryId : entryId,
+				customInfoKey : custom_info_key,
+				customInfoValue : custom_info_value,
+			},
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("操作成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function modifyCustomInfo() {
+		var entryId = ${brokerAccessEntry.entryId?c};
+		var custom_info_key = $("#modify_custom_info_key").val();
+		var custom_info_value = $("#modify_custom_info_value").val();
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAccessAdmin/addCustomInfo",
+			data : {
+				entryId : entryId,
+				customInfoKey : custom_info_key,
+				customInfoValue : custom_info_value,
+			},
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("操作成功");
+					window.location.href='${base_url}/SledBrokerAccessAdmin/show?entryId=${brokerAccessEntry.entryId?c}&brokerCnName=${brokerCnName}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	</script>
+
+</body>
+</html>

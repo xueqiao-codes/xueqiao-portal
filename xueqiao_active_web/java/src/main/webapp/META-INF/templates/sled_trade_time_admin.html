@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易时间管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+<style type="text/css">
+.input_frame {
+	color: #303030;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+	padding: 2px 10px;
+	background: white;
+	height: 24px;
+	width: 120px;
+}
+table{
+	table-layout:fixed;word-break:break-all;
+}
+</style>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">交易时间管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>交易时间管理</b></span>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">商品ID：<input type=text id="search_commodity" class="input_conponent" style="width: 150px" <#if sledCommodityId != -1>value="${sledCommodityId?c}"</#if> onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')"/></span>&nbsp;
+					<span>交易所：<input type=text id="exchangeMic" class="input_conponent" style="width: 150px" value="${exchangeMic!''}"/></span>&nbsp;
+					<span>商品代码：<input type=text id="search_commodity_code" class="input_conponent" style="width: 150px" value="${sledCommodityCode!''}"/></span>&nbsp;
+					<span>商品中文名：<input type=text id="commodityCnName" class="input_conponent" style="width: 150px" value="${commodityCnName!''}"/></span>&nbsp;
+					<span>时间：<input id="search_time" class="input_frame" type="date" style="width: 180px" value="${searchTime!''}" /></span>&nbsp;
+					<button id="btn-search" class="sled_btn_enable">查询</button>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="30">商品ID</th>
+							<th class="table_nav_key" width="30">交易所</th>
+							<th class="table_nav_key" width="30">商品类型</th>
+							<th class="table_nav_key" width="30">商品代码</th>
+							<th class="table_nav_key" width="50">商品</th>
+							<th class="table_nav_key" width="50">时区</th>
+							<th class="table_nav_key" width="100">T时段(当地时间)</th>
+						</tr>
+						<#if sledTradeTimeList??>
+							<#list sledTradeTimeList as sledTradeTime>
+								<tr>
+									<td align="center">${sledTradeTime.sledCommodityId?c}</td>
+									<td align="center">${sledTradeTime.exchangeMic!''}</td>
+									<td align="center">${sledTradeTime.sledCommodityType!''}</td>
+									<td align="center">${sledTradeTime.sledCommodityCode!''}</td>
+									<td align="center">${sledTradeTime.sledCommodityCnName!''}</td>
+									<td align="center">${sledTradeTime.timezone!''}</td>
+									
+									<#if sledTradeTime.localDateTimeSpanList??>
+										<td align="center">
+											<#list sledTradeTime.localDateTimeSpanList as dateTimeSpan>
+												<div style="margin-top: 10px; margin-bottom: 10px">
+													<#if dateTimeSpan.localTimeTOpenList??>
+														<#list dateTimeSpan.localTimeTOpenList as timeTOpen>
+															<div>
+																<span style="width: 100px;">${timeTOpen!""}</span>
+															</div>
+														</#list>
+													</#if>
+												</div>
+											</#list>
+										</td>
+									<#else>
+										<td align="center">-</td>
+									</#if>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/>
+			<#include "page_nav.html">
+		</div>
+	</div>
+
+	<script>
+	
+	$("#btn-search").click(function( event ) {
+		var exchangeMic = $("#exchangeMic").val();
+		var commodityCnName = $("#commodityCnName").val();
+		
+		var search_commodity_id = $("#search_commodity").val();
+		var search_time = $("#search_time").val();
+		var search_commodity_code = $("#search_commodity_code").val();
+		var margin_days = 0;
+		
+		//if ((search_commodity_id == null || search_commodity_id == undefined || search_commodity_id == '') && (search_time == null || search_time == undefined || search_time == '') && (search_commodity_code == null || search_commodity_code == undefined || search_commodity_code == '')) {
+		//	alert('请输入商品代码或商品ID或者时间');
+		//	return;
+		//}
+		
+		doTradeTimeFitler(search_commodity_id, search_time, search_commodity_code, exchangeMic, commodityCnName, margin_days);
+	});
+	
+	function doTradeTimeFitler(searchCommodityId, searchTime, search_commodity_code, exchangeMic, commodityCnName, margin_days) {
+		var queryUrl = "${base_url}/SledTradeTimeAdmin/show?sledCommodityId=" + searchCommodityId
+			+ "&searchTime=" + searchTime
+			+ "&sledCommodityCode=" + encodeURIComponent(search_commodity_code)
+			+ "&exchangeMic=" + exchangeMic
+			+ "&marginDays=" + margin_days
+			+ "&commodityCnName=" + commodityCnName;
+
+		window.location.href = queryUrl;
+	}
+	
+	function unlockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeAdmin/unlockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("退出编辑状态");
+					window.location.href='${base_url}/SledTradeTimeAdmin/show?sledCommodityId=${sledCommodityId}&searchTime=${searchTime!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	function lockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeAdmin/lockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("进入编辑状态");
+					window.location.href='${base_url}/SledTradeTimeAdmin/show?sledCommodityId=${sledCommodityId}&searchTime=${searchTime!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default"><#if (platform!"") == "CTP">CTP</#if><#if (platform!"") == "ESUNNY">易盛9.0</#if>&nbsp;映射列表</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b><#if (platform!"") == "CTP">CTP</#if><#if (platform!"") == "ESUNNY">易盛9.0</#if>&nbsp;映射列表</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<span class="tab_active"><b>交易所</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/GeneralCommodityTypeMapDetail/show?platform=${platform!''}"><span class="tab_inactive"><b>商品类型</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/GeneralCommodityMapDetail/show?platform=${platform!''}"><span class="tab_inactive"><b>商品</b></span></a>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">交易所：<input type=text id="sledExchangeCnName" class="input_conponent" style="width: 150px" value="${sledExchangeCnName!''}"/></span>&nbsp;
+					<span>MIC：<input type=text id="sledExchangeMic" class="input_conponent" style="width: 150px" value="${sledExchangeMic!''}"/></span>&nbsp;
+					<span>CODE：<input type=text id="techPlatformExchangeCode" class="input_conponent" style="width: 150px" value="${techPlatformExchangeCode!''}"/></span>&nbsp;
+					<button id="submit_option_button" class="sled_btn_enable">查询</button>
+					
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add-exchange-map" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+						<thead>
+							<tr bgColor=#F8FCFF>
+								<th data-colspan="2">雪橇</th>
+								<#if (platform!"") == "CTP">
+									<th data-colspan="1">CTP</th>
+								<#elseif (platform!"") == "ESUNNY">
+									<th data-colspan="1">易盛9.0</th>
+								<#else>
+									<th data-colspan="1">${platform!""}</th>
+								</#if>
+							</tr>
+							<tr bgColor=#F8FCFF>
+								<th width="50">交易所</th>
+								<th width="50">MIC</th>
+								
+								<th width="50">CODE</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if exchangeMappingList??>
+								<#list exchangeMappingList as exchangeMapping>
+									<tr>
+										<td>${exchangeMapping.sledExchangeCnName!""}</td>
+										<td>${exchangeMapping.sledExchangeMic!""}</td>
+										<td>${exchangeMapping.techPlatformExchangeCode!""}</td>
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_exchange_mapping_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">雪橇交易所MIC</label> <input
+				class="dialog_input_value" type="text" name="add_sled_exchange_mic"
+				id="add_sled_exchange_mic" list="list_sled_exchange_mic">
+			
+			<#if sledExchangeMicList??>
+				<datalist id="list_sled_exchange_mic">
+				<#list sledExchangeMicList as sledExchangeMic>
+					<option value=${sledExchangeMic!""} />
+				</#list>
+				</datalist>
+			</#if>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">对应CODE</label> <input
+				class="dialog_input_value" type="text" name="add_tech_platform_exchange_code" id="add_tech_platform_exchange_code">
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#add_exchange_mapping_dialog").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var sled_exchange_mic = $("#add_sled_exchange_mic").val();
+				var tech_platform_exchange_code = $("#add_tech_platform_exchange_code").val();
+				
+				if (sled_exchange_mic == null || sled_exchange_mic == undefined || sled_exchange_mic == '') {
+					alert('请输入雪橇交易所MIC');
+					return;
+				}
+				if (tech_platform_exchange_code == null || tech_platform_exchange_code == undefined || tech_platform_exchange_code == '') {
+					alert('请输入对应的CODE');
+					return;
+				}
+				
+				addSledExchangeMapping();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#submit_option_button").click(function() {
+		var sledExchangeCnName = $.trim($("#sledExchangeCnName").val());
+		var sledExchangeMic = $.trim($("#sledExchangeMic").val());
+		var techPlatformExchangeCode = $.trim($("#techPlatformExchangeCode").val());
+		
+		var queryUrl = "${base_url}/GeneralExchangeMapDetail/show?platform=${platform}"
+			+ "&sledExchangeCnName=" + sledExchangeCnName
+			+ "&sledExchangeMic=" + sledExchangeMic
+			+ "&techPlatformExchangeCode=" + techPlatformExchangeCode;
+		window.location.href = queryUrl;
+	});
+	
+	$("#btn-add-exchange-map").click(function( event ) {
+		$("#add_exchange_mapping_dialog").dialog("option", "title", "添加交易所映射");
+		$("#add_exchange_mapping_dialog").dialog("open");
+	});
+	
+	function addSledExchangeMapping() {
+		var sled_exchange_mic = $("#add_sled_exchange_mic").val();
+		var tech_platform_exchange_code = $("#add_tech_platform_exchange_code").val();
+		
+		var request = {
+				sledExchangeMic : sled_exchange_mic,
+				techPlatformExchangeCode : tech_platform_exchange_code,
+				techPlatform : "${platform!''}",
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/GeneralExchangeMapDetail/addSledExchangeMapping",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/GeneralExchangeMapDetail/show?platform=${platform!""}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

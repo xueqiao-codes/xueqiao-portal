@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>模拟环境商品管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+<style type="text/css">
+.select_area_item {
+	height: 236px;
+}
+.select_area_item_title {
+	height: 36px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	font-size: 16px;
+	color: #303030;
+}
+.select_area_sub_item {
+	height: 200px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    overflow: auto;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.select_area_sub_item2 {
+    height: 200px;
+    width: 500px;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    overflow: auto;
+
+}
+.select_area_sub_item2_sub {
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.right {
+	float: right;
+}
+.input_frame {
+	color: #303030;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+	padding: 2px 10px;
+	background: white;
+	height: 24px;
+	width: 100px;
+}
+</style>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">模拟环境商品管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>模拟环境商品管理</b></span>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">交易所MIC：<input type=text id="exchangeMic" class="input_conponent" style="width: 150px" value="${exchangeMic!''}"/></span>&nbsp;
+					<span>交易所中文名：<input type=text id="exchangeCnName" class="input_conponent" style="width: 150px" value="${exchangeCnName!''}" /></span>&nbsp;
+					<span>商品代码：<input type=text id="commodityCode" class="input_conponent" style="width: 150px" value="${commodityCode!''}"/></span>&nbsp;
+					<span>商品中文名：<input type=text id="commodityCnName" class="input_conponent" style="width: 150px" value="${commodityCnName!''}"/></span>&nbsp;
+					<button id="submit_option_button" class="sled_btn_enable">查询</button>
+				
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-dst-transfer-config" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="50">交易所MIC</th>
+							<th class="table_nav_key" width="50">交易所中文名</th>
+							<th class="table_nav_key" width="50">商品类型</th>
+							<th class="table_nav_key" width="50">商品代码</th>
+							<th class="table_nav_key" width="50">商品中文名</th>
+							<th class="table_nav_key" width="50">删除</th>
+						</tr>
+						<#if localSimulateEnvCommodityList??>
+							<#list localSimulateEnvCommodityList as localSimulateEnvCommodity>
+								<tr>
+									<td align="center">${localSimulateEnvCommodity.exchangeMic!""}</td>
+									<td align="center">${localSimulateEnvCommodity.exchangeCnName!""}</td>
+									<td align="center">${localSimulateEnvCommodity.sledCommodityType!""}</td>
+									<td align="center">${localSimulateEnvCommodity.sledCommodityCode!""}</td>
+									<td align="center">${localSimulateEnvCommodity.sledCommodityCnName!""}</td>
+									<td align="center"><a href="javascript:showDeleteSimulateEnvCommodityDialog(${localSimulateEnvCommodity.sledCommodityId?c});"><img src="${static_url}/img/icon_delete.png"/></a></td>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+
+	<!-- dialog -->
+	<div id="add_simulate_env_commodity_dialog">
+		<div class="flex_row">
+			<div class="select_area_item">
+				<div><span class="select_area_item_title">交易所</span></div>
+				<div id="exchange_list" class="select_area_sub_item" style="width: 180px">
+					<span style="width: 120px">交易所1</span><input class="right" type="radio" checked="checked" name="exchangeMic"/><br>
+				</div>
+			</div>
+			<div class="select_area_item">
+				<div><span class="select_area_item_title">商品类型</span></div>
+				<div id="commodity_type_list" class="select_area_sub_item" style="width: 90px">
+					<input type="radio" checked="checked" name="commodityType" onclick='onSelectionItemClick(event)' value="FUTURES" /><span style="width: 50px">期货</span><br>
+					<input type="radio" name="commodityType" onclick='onSelectionItemClick(event)' value="SPREAD_MONTH" /><span style="width: 50px">跨期</span><br>
+					<input type="radio" name="commodityType" onclick='onSelectionItemClick(event)' value="SPREAD_COMMODITY" /><span style="width: 50px">跨品种</span><br>
+				</div>
+			</div>
+			<div class="select_area_item">
+				<div>
+					<span class="select_area_item_title">商品</span>
+					<span class='right'>全选</span>&nbsp;
+					<input class='right' type='checkbox' id="sledCommodityAllSelect" name='sledCommodityAllSelect' onclick='onCommodityAllSelect(event)'/>&nbsp;
+				</div>
+				<div id="commodity_list" class="col-md-12 select_area_sub_item2" style="width: 522px">
+					<div class="col-md-4 select_area_sub_item2_sub">
+						<span style="width: 120px">AAAA</span><input class="right" type="checkbox" name="time"/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	
+	$("#add_simulate_env_commodity_dialog").dialog({
+		autoOpen : false,
+		height : 350,
+		width : 900,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				// exchange
+				var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+				var exchangeMic = groupExchangeMic.attr("value");
+				
+				// commodity type
+				var groupCommodityType = $("[name='commodityType']").filter(":checked");
+				var commodityType = groupCommodityType.attr("value");
+				
+				// commodity list
+				var groupCommodity = $("[name='sledCommodityIds']").filter(":checked");
+				
+				// standard2DstOffSetMinute
+				var standard2DstOffSetMinute = $("#standard2DstOffSetMinute").val();
+				
+				if (exchangeMic == null || exchangeMic == undefined || exchangeMic == '') {
+					alert('获取不到交易所信息，请检查后再提交');
+					return;
+				}
+				if (commodityType == null || commodityType == undefined || commodityType == '') {
+					alert('获取不到商品类型信息，请检查后再提交');
+					return;
+				}
+				if (groupCommodity.length < 1) {
+					alert('请选择至少一个商品');
+					return;
+				}
+				
+				addSimulateEnvCommodity();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#submit_option_button").click(function() {
+		var exchangeMic = $.trim($("#exchangeMic").val());
+		var exchangeCnName = $.trim($("#exchangeCnName").val());
+		var commodityCode = $.trim($("#commodityCode").val());
+		var commodityCnName = $.trim($("#commodityCnName").val());
+		
+		var queryUrl = "${base_url}/SledSimulateEnvCommodityAdmin/show?exchangeMic=" + exchangeMic
+			+ "&exchangeCnName=" + exchangeCnName
+			+ "&commodityCode=" + commodityCode
+			+ "&commodityCnName=" + commodityCnName;
+		window.location.href = queryUrl;
+	});
+	
+	$("#btn-dst-transfer-config").click(function( event ) {
+		$("#add_simulate_env_commodity_dialog").dialog("option", "title", "添加模拟环境可用商品");
+		$("#add_simulate_env_commodity_dialog").dialog("open");
+		
+		getSimulateEnvCommoditySelectionInfo("", "");
+	});
+	
+	function onSelectionItemClick(event) {
+		var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+		var exchangeMic = groupExchangeMic.attr("value");
+		
+		var groupCommodityType = $("[name='commodityType']").filter(":checked");
+		var commodityType = groupCommodityType.attr("value");
+		
+		getSimulateEnvCommoditySelectionInfo(exchangeMic, commodityType);
+	}
+	
+	function onCommodityAllSelect(event) {
+		var isCheck=$("#sledCommodityAllSelect").is(':checked');
+		$("[name='sledCommodityIds']").each(function() {  
+			this.checked = isCheck;
+		});
+	}
+	
+	function getSimulateEnvCommoditySelectionInfo(exchangeMic, sledCommodityType) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledSimulateEnvCommodityAdmin/getSimulateEnvCommoditySelectionInfo",
+			data : {
+				exchangeMic : exchangeMic,
+				sledCommodityType : sledCommodityType,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				refreshSimulateEnvCommodityDialogContent(result);
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function refreshSimulateEnvCommodityDialogContent(result) {
+		var exchange_content = "";
+		for (index in result.exchangeList) {
+			var exchange = result.exchangeList[index];
+			if (exchange.exchangeMic == result.exchangeMic) {
+				exchange_content = exchange_content + "<input type='radio' checked='checked' name='exchangeMic' onclick='onSelectionItemClick(event)' value=" + exchange.exchangeMic + " /><span style='width: 120px'>" + exchange.exchangeMic + "&nbsp;" + exchange.cnName + "</span><br>";
+			} else {
+				exchange_content = exchange_content + "<input type='radio' name='exchangeMic' onclick='onSelectionItemClick(event)' value=" + exchange.exchangeMic + " /><span style='width: 120px'>" + exchange.exchangeMic + "&nbsp;" + exchange.cnName + "</span><br>";
+			}
+		}
+		
+		var commodity_content = "";
+		for (index in result.LocalSimpleCommodityList) {
+			var commodity = result.LocalSimpleCommodityList[index];
+			commodity_content = commodity_content + "<div class='col-md-4 select_area_sub_item2_sub'><input class='right' type='checkbox' name='sledCommodityIds' value=" + commodity.sledCommodityId + " /><span style='width: 120px'>" + commodity.cnName + "</span></div>";
+		}
+		
+		$("#exchange_list").html(exchange_content);
+		$("#commodity_list").html(commodity_content);
+	}
+	
+	function addSimulateEnvCommodity() {
+		// exchange
+		var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+		var exchangeMic = groupExchangeMic.attr("value");
+		
+		// commodity type
+		var groupCommodityType = $("[name='commodityType']").filter(":checked");
+		var commodityType = groupCommodityType.attr("value");
+		
+		// commodity list
+		var groupCommodity = $("[name='sledCommodityIds']").filter(":checked");
+		var commodityList = new Array();
+		for(var i = 0; i < groupCommodity.length; i++){
+			if(groupCommodity[i].checked) {
+				commodityList.push(groupCommodity[i].value);
+			}
+		}
+		
+		var request = {
+				commodityIds : commodityList,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledSimulateEnvCommodityAdmin/addSimulateEnvCommodity",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/SledSimulateEnvCommodityAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function showDeleteSimulateEnvCommodityDialog(sledCommodityId) {
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledSimulateEnvCommodityAdmin/deleteSimulateEnvCommodity",
+				data : {
+					sledCommodityId : sledCommodityId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledSimulateEnvCommodityAdmin/show';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	</script>
+</body>
+</html>

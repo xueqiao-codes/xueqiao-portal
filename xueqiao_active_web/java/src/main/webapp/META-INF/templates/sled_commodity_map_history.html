@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>易盛映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+</head>
+<body>
+
+	<div class="col-md-12">
+		<span>当前位置：</span>
+		<a href="${base_url}/SledCommodityMapAdmin/show"><span>易盛映射管理</span></a>
+		<span>&nbsp;>&nbsp;${brokerCnName!""}&nbsp;历史记录</span>
+		<div style="height: 20px;"></div>
+	</div>
+
+	<nav class="nav navbar-default" role="navigation">
+		<div class="collapse navbar-collapse">
+			<div class="nav navbar-nav" style="font-size: 25px;">${brokerCnName!""}&nbsp;历史记录</div>
+		</div>
+	</nav>
+	<div style="height: 10px;"></div>
+	
+	<div class="list_container">
+		<table class="table table-striped table-bordered" style="border: 1px;">
+			<tr>
+				<th class="table_nav_key" width="50">版本号</th>
+				<th class="table_nav_key" width="150">最后导入时间</th>
+				<th class="table_nav_key" width="150">MD5</th>
+				<th class="table_nav_key" width="50">下载</th>
+			</tr>
+			<#if commodityMapFileInfoList??>
+				<#list commodityMapFileInfoList as mapFileInfo>
+					<tr>
+						<td align="center">${mapFileInfo.version!""}</td>
+						<td align="center">${mapFileInfo.lastModityTime!""}</td>
+						<td align="center">${mapFileInfo.fileMD5!""}</td>
+						<td align="center"><a href="${mapFileInfo.url!''}"><span class="badge">下载</span></a></td>
+					</tr>
+				</#list>
+			</#if>
+		</table>
+	</div>
+
+	<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+	<#include "page_nav.html">
+
+</body>

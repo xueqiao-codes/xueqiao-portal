@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>券商管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">券商管理</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode">
+				<#if moduleEditable == 1>
+					<a href="javascript:unlockModule();">退出编辑状态并同步</a>
+				<#elseif moduleEditable == 2>
+					<span>${lockModule!""}模块在编辑中</span>
+				<#elseif moduleEditable == 3>
+					<span>${lockUserName}在编辑${lockModule!""}模块</span>
+				<#else>
+					<a href="javascript:lockModule();">进入编辑状态</a>
+				</#if>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>券商管理</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<!-- <div class="general_margin_left"> -->
+						<span class="general_margin_left">ID：<input type=text id="brokerId" class="input_conponent" style="width: 150px" <#if brokerId != 0>value="${brokerId?c}"</#if> /></span>&nbsp;
+						<span>中文名：<input type=text id="cnName" class="input_conponent" style="width: 150px" value="${cnName!''}"/></span>&nbsp;
+						<span>英文名：<input type=text id="engName" class="input_conponent" style="width: 150px" value="${engName!''}"/></span>&nbsp;
+						<span>平台：</span>
+						<select id="brokerPlatform" name="brokerPlatform" class="input_conponent" style="width: 150px" >
+							<option value=""></option>
+							<#if brokerPlatform == "CTP">
+								<option value="CTP" selected="true">CTP</option>
+							<#else>
+								<option value="CTP">CTP</option>
+							</#if>
+							<#if brokerPlatform == "ESUNNY">
+								<option value="ESUNNY" selected="true">ESUNNY</option>
+							<#else>
+								<option value="ESUNNY">ESUNNY</option>
+							</#if>
+							<#if brokerPlatform == "SP">
+								<option value="SP" selected="true">SP</option>
+							<#else>
+								<option value="SP">SP</option>
+							</#if>
+							<#if brokerPlatform == "ESUNNY_3">
+								<option value="ESUNNY_3" selected="true">ESUNNY_3</option>
+							<#else>
+								<option value="ESUNNY_3">ESUNNY_3</option>
+							</#if>
+						</select>
+						<button id="submit_option_button" class="sled_btn_enable">查询</button>
+					<!-- </div> -->
+				
+					<div class="sled_align_rifht general_margin_right">
+						<#if moduleEditable == 1>
+							<button id="btn-add-broker" class="sled_btn_enable">添加</button>
+						<#else>
+							<button id="btn-add-broker" class="sled_btn_disable" disabled="disabled">添加</button>
+						</#if>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="50">券商ID</th>
+							<th class="table_nav_key" width="100">中文名称</th>
+							<th class="table_nav_key" width="100">英文名称</th>
+							<th class="table_nav_key" width="150">备注</th>
+							<th class="table_nav_key" width="200">接入平台</th>
+							<th class="table_nav_key" width="50">修改</th>
+						</tr>
+						<#if brokerEntryList??>
+							<#list brokerEntryList as brokerEntry>
+								<#assign pf>
+									<#if brokerEntry.platforms??>
+										<#list brokerEntry.platforms as platform>
+											<a href="${base_url}/SledBrokerAccessAdmin/show?brokerId=${brokerEntry.brokerId?c}&platform=${platform}&brokerCnName=${brokerEntry.cnName}">${platform}</a>&nbsp;
+										</#list>
+									</#if>
+								</#assign>
+								
+								<tr>
+									<td align="center">${brokerEntry.brokerId?c}</td>
+									<td align="center">${brokerEntry.cnName}</td>
+									<td align="center">${brokerEntry.engName}</td>
+									<td align="center">${brokerEntry.note}</td>
+									<td align="center">${pf}</td>
+									<#if moduleEditable == 1>
+										<td align="center"><a href="javascript:showModifyBrokerDialog(${brokerEntry.brokerId?c});"><img src="${static_url}/img/icon_edit.png"/></a></td>
+									<#else>
+										<td align="center"><img src="${static_url}/img/icon_edit_disabled.png"/></td>
+									</#if>
+								</tr>
+							</#list>
+						<#else> 没有数据  </#if>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_broker_dialog">
+		<input type="hidden" name="dialog_type" id="dialog_type">
+		<input type="hidden" name="broker_id" id="broker_id">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文名称:</label> 
+			<input class="dialog_input_value" type="text" name="add_cn_name" id="add_cn_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文名称:</label> 
+			<input class="dialog_input_value" type="text" name="add_eng_name" id="add_eng_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">备注:</label> 
+			<input class="dialog_input_value" type="text" name="add_note" id="add_note">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">平台:</label> 
+			<label><input type="checkbox" name="add_pf_ctp" id="add_pf_ctp" value="CTP">CTP</label>&nbsp;&nbsp;
+			<label><input type="checkbox" name="add_pf_es" id="add_pf_es" value="ESUNNY">ESUNNY</label>&nbsp;&nbsp;
+			<label><input type="checkbox" name="add_pf_sp" id="add_pf_sp" value="SP">SP</label>&nbsp;&nbsp;
+			<label><input type="checkbox" name="add_pf_es_3" id="add_pf_es_3" value="ESUNNY_3">ESUNNY_3</label>
+		</fieldset>
+	</div>
+
+
+	<script>
+	
+	$("#add_broker_dialog").dialog({
+		autoOpen : false,
+		height : 250,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var add_cn_name = $("#add_cn_name").val();
+				var add_eng_name = $("#add_eng_name").val();
+				var add_note = $("#add_note").val();
+				
+				if (add_cn_name == null || add_cn_name == undefined || add_cn_name == '') {
+					alert('请输入中文名称');
+					return;
+				}
+				if (add_eng_name == null || add_eng_name == undefined || add_eng_name == '') {
+					alert('请输入英文名称');
+					return;
+				}
+				
+				var type = $("#dialog_type").val();
+				if (type == "add_broker") {
+					addBroker();
+				} else {
+					modifyBroker();
+				}
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#btn-add-broker").click(function( event ) {
+		$("#dialog_type").val("add_broker");
+		$("#add_broker_dialog").dialog("option", "title", "添加券商");
+		$("#add_broker_dialog").dialog("open");
+		
+		$("#broker_id").val("");
+		$("#add_cn_name").val("");
+		$("#add_eng_name").val("");
+		$("#add_note").val("");
+		document.getElementById("add_pf_ctp").checked = false;
+		document.getElementById("add_pf_es").checked = false;
+		document.getElementById("add_pf_sp").checked = false;
+		document.getElementById("add_pf_es_3").checked = false;
+		
+		event.preventDefault();
+	});
+	
+	$("#submit_option_button").click(function() {
+		var brokerId = $.trim($("#brokerId").val());
+		var cnName = $.trim($("#cnName").val());
+		var engName = $.trim($("#engName").val());
+		var brokerPlatform = $.trim($("#brokerPlatform").val());
+		
+		var queryUrl = "${base_url}/SledBrokerAdmin/show?brokerId=" + brokerId
+			+ "&cnName=" + cnName
+			+ "&engName=" + engName
+			+ "&brokerPlatform=" + brokerPlatform;
+		window.location.href = queryUrl;
+	});
+	
+	function showModifyBrokerDialog(brokerId) {
+		$("#dialog_type").val("modify_broker");
+		$("#add_broker_dialog").dialog("option", "title", "修改券商");
+		$("#add_broker_dialog").dialog("open");
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAdmin/getBrokerEntry",
+			data : {
+				brokerId : brokerId,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				$("#broker_id").val(brokerId);
+				$("#add_cn_name").val(result.cnName);
+				$("#add_eng_name").val(result.engName);
+				$("#add_note").val(result.note);
+				
+				document.getElementById("add_pf_ctp").checked = false;
+				document.getElementById("add_pf_es").checked = false;
+				document.getElementById("add_pf_sp").checked = false;
+				document.getElementById("add_pf_es_3").checked = false;
+				
+				var arr = result.platforms;
+				for(var i in arr){
+					//alert(i + ", " + arr[i]);
+					if (arr[i] == "CTP") {
+						document.getElementById("add_pf_ctp").checked = true;
+					} else if (arr[i] == "ESUNNY") {
+						document.getElementById("add_pf_es").checked = true;
+					} else if (arr[i] == "SP") {
+						document.getElementById("add_pf_sp").checked = true;
+					} else if (arr[i] == "ESUNNY_3") {
+						document.getElementById("add_pf_es_3").checked = true;
+					}
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function addBroker() {
+		var add_cn_name = $("#add_cn_name").val();
+		var add_eng_name = $("#add_eng_name").val();
+		var add_note = $("#add_note").val();
+		
+		var add_pf_ctp ="";
+		var add_pf_es ="";
+		var add_pf_sp ="";
+		var add_pf_es_3 ="";
+		
+		if(document.getElementById("add_pf_ctp").checked){
+			add_pf_ctp = "CTP";
+		} else {
+			add_pf_ctp ="";
+		}
+		if(document.getElementById("add_pf_es").checked){
+			add_pf_es = "ESUNNY";
+		} else {
+			add_pf_es = "";
+		}
+		if(document.getElementById("add_pf_sp").checked){
+			add_pf_sp = "SP";
+		} else {
+			add_pf_sp = "";
+		}
+		if(document.getElementById("add_pf_es_3").checked){
+			add_pf_es_3 = "ESUNNY_3";
+		} else {
+			add_pf_es_3 = "";
+		}
+		
+		var add_platforms = [add_pf_ctp,add_pf_es,add_pf_sp,add_pf_es_3];
+		//var add_platforms = ["\' + add_pf_ctp + "\',\'" + add_pf_es + "\',\'" + add_pf_sp + "\',\'" + add_pf_es_3 + \'"];
+		
+		var request = {
+				cnName : add_cn_name,
+				engName : add_eng_name,
+				note : add_note,
+				platforms : add_platforms,
+			};
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAdmin/addBrokerEntry",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("操作成功");
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else if (data.errorCode == 2){
+					alert(data.errorMsg);
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function modifyBroker() {
+		var broker_id = $("#broker_id").val();
+		var add_cn_name = $("#add_cn_name").val();
+		var add_eng_name = $("#add_eng_name").val();
+		var add_note = $("#add_note").val();
+		
+		var add_pf_ctp ="";
+		var add_pf_es ="";
+		var add_pf_sp ="";
+		var add_pf_es_3 ="";
+		
+		if(document.getElementById("add_pf_ctp").checked){
+			add_pf_ctp = "CTP";
+		} else {
+			add_pf_ctp ="";
+		}
+		if(document.getElementById("add_pf_es").checked){
+			add_pf_es = "ESUNNY";
+		} else {
+			add_pf_es = "";
+		}
+		if(document.getElementById("add_pf_sp").checked){
+			add_pf_sp = "SP";
+		} else {
+			add_pf_sp = "";
+		}
+		if(document.getElementById("add_pf_es_3").checked){
+			add_pf_es_3 = "ESUNNY_3";
+		} else {
+			add_pf_es_3 = "";
+		}
+		
+		var add_platforms = [add_pf_ctp,add_pf_es,add_pf_sp,add_pf_es_3];
+		//var add_platforms = ["\' + add_pf_ctp + "\',\'" + add_pf_es + "\',\'" + add_pf_sp + "\',\'" + add_pf_es_3 + \'"];
+		
+		var request = {
+				brokerId : broker_id,
+				cnName : add_cn_name,
+				engName : add_eng_name,
+				note : add_note,
+				platforms : add_platforms,
+			};
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAdmin/modifyBrokerEntry",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("操作成功");
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else if (data.errorCode == 2){
+					alert(data.errorMsg);
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else {
+					alert(data.errorMsg);
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function unlockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAdmin/unlockModuleBroker",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("退出编辑状态");
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	function lockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledBrokerAdmin/lockModuleBroker",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("进入编辑状态");
+					window.location.href='${base_url}/SledBrokerAdmin/show';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	</script>
+
+</body>
+</html>

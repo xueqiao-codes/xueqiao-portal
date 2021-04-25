@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">用户中心</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>用户中心</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<a href="${base_url}/MUserCenterCompanyAdmin/show"><span class="tab_inactive"><b>公司</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterUserAdmin/show"><span class="tab_inactive"><b>用户</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<span class="tab_active"><b>服务组</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterOrderAdmin/show"><span class="tab_inactive"><b>订单</b></span></a>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th width="50">companyId</th>
+								<th width="50">groupId</th>
+								<th width="50">groupCode</th>
+								<th width="50">groupName</th>
+								<th width="50">查询组用户</th>
+								<th width="50">删除组</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if groupList??>
+								<#list groupList as group>
+									<tr>
+										<td>${group.companyId}</td>
+										<td>${group.groupId}</td>
+										<td>${group.groupCode}</td>
+										<td>${group.groupName!""}</td>
+										<td><a href="${base_url}/MUserCenterCompanyGroupUserAdmin/show?companyId=${group.companyId?c}&groupId=${group.groupId?c}">查询用户</a></td>
+										<td><a href="javascript:deleteCompanyGroup(${group.companyId?c}, ${group.groupId?c});">删除</a></td>
+										
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_company_group">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">groupCode</label>
+			<input class="dialog_input_value" type="text" name="add_group_code" id="add_group_code">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">groupName</label>
+			<input class="dialog_input_value" type="text" name="add_group_name" id="add_group_name">
+		</fieldset>
+	</div>
+	
+	<div id="add_company_group_user">
+		<input type="hidden" name="company_id" id="company_id">
+		<input type="hidden" name="group_id" id="group_id">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">用户</label>
+			<select id="add_group_user_id" name="add_group_user_id" class="input_conponent" style="width: 250px">
+				<#if companyUserList??>
+					<#list companyUserList as companyUser>
+						<option value=${companyUser.userId?c}>${companyUser.userName}-【${companyUser.cnName}】</option>
+					</#list>
+				</#if>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">角色</label>
+			<select id="add_group_user_role" name="add_group_user_role" class="input_conponent" style="width: 250px">
+				<option value="TRADER">TRADER</option>
+				<option value="ADMIN">ADMIN</option>
+				<option value="OBSERVER">OBSERVER</option>
+			</select>
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#add_company_group").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 460,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var add_group_code = $("#add_group_code").val();
+				var add_group_name = $("#add_group_name").val();
+				
+				
+				if (add_group_code == null || add_group_code == undefined || add_group_code == '') {
+					alert('请输组代号');
+					return;
+				}
+				if (add_group_name == null || add_group_name == undefined || add_group_name == '') {
+					alert('请输入组名称');
+					return;
+				}
+				
+				addCompanyGroup();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#add_company_group_user").dialog({
+		autoOpen : false,
+		height : 200,
+		width : 460,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				
+				addCompanyGroupUser();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#btn-add").click(function() {
+		$("#add_company_group").dialog("option", "title", "添加公司服务组");
+		$("#add_company_group").dialog("open");
+	});
+	
+	function addCompanyGroup() {
+		var add_company_id = ${companyId?c};
+		var add_group_code = $("#add_group_code").val();
+		var add_group_name = $("#add_group_name").val();
+		
+		var request = {
+				companyId : add_company_id,
+				groupCode : add_group_code,
+				groupName : add_group_name,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/MUserCenterServiceGroupAdmin/addCompanyGroup",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/MUserCenterServiceGroupAdmin/show?companyId=${companyId?c}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function showAddGroupUserDialog(companyId, groupId) {
+		$("#add_company_group_user").dialog("option", "title", "添加公司服务组用户");
+		$("#add_company_group_user").dialog("open");
+		
+		$("#company_id").val(companyId);
+		$("#group_id").val(groupId);
+	}
+	
+	function addCompanyGroupUser() {
+		var company_id = $("#company_id").val();
+		var group_id = $("#group_id").val();
+		var add_group_user_id = $("#add_group_user_id").val();
+		var add_group_user_role = $("#add_group_user_role").val();
+		
+		var request = {
+				userId : add_group_user_id,
+				role : add_group_user_role,
+				companyId : company_id,
+				groupId : group_id,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/MUserCenterServiceGroupAdmin/addCompanyGroupUser",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/MUserCenterServiceGroupAdmin/show?companyId=${companyId?c}';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function deleteCompanyGroup(companyId, groupId) {
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/MUserCenterServiceGroupAdmin/deleteCompanyGroup",
+				data : {
+					companyId : companyId,
+					groupId : groupId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/MUserCenterServiceGroupAdmin/show?companyId=${companyId?c}';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易时间管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<!--<link rel="stylesheet" href="${static_url}/css/bootstrap-table.min.css" />-->
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<!--<script type="text/javascript" src="${static_url}/js/bootstrap-table.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+	<style>
+		.trade_time_config_dialog_label{
+			height: 24px;
+		}
+		.trade_time_config_dialog_input{
+			width: 90px;
+			height: 24px;
+			color: #303030;
+			font-size: 14px;
+			border-width: 1px;
+			border-style: solid;
+			border-radius: 3px;
+			border-color: #CCCCCC;
+			padding: 2px 10px;
+			background: white;
+			text-align: center;
+		}
+
+	</style>
+
+</head>
+<body>
+
+<div id="vue-app-admin">
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledTradeTimeAdmin/show">交易时间管理</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_default">设置交易时间</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode">
+				<#if moduleEditable == 1>
+					<a href="javascript:unlockModule();">退出编辑状态并同步</a>
+				<#elseif moduleEditable == 2>
+					<span>${lockModule!""}模块在编辑中</span>
+				<#elseif moduleEditable == 3>
+					<span>${lockUserName}在编辑${lockModule!""}模块</span>
+				<#else>
+					<a href="javascript:lockModule();">进入编辑状态</a>
+				</#if>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>${exchangeMic!''}&nbsp;&nbsp;${sledCommodityCnName}&nbsp;&nbsp;设置交易时间</b></span>
+			</div>
+		</div>
+	</div>
+	
+		<!-- content container -->
+	<div class="col-md-12 general_margin_top">
+		<div class="sled_panel col-md-12">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add" <#if moduleEditable == 1>class="sled_btn_enable"<#else>class="sled_btn_disable"</#if> @click="showAddTradingSessionDialog">添加Trading Session</button>
+						<!--<button id="btn-add" class="sled_btn_enable" @click="showAddTradingSessionDialog">添加Trading Session</button>-->
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<span>冬令时(标准时间)</span>
+			<!-- table -->
+			<!--<div class="general_bg_default">-->
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="10">Session ID</th>
+							<th width="50">Trading Session</th>
+							<th width="10">操作</th>
+
+						</tr>
+						<tr v-for="standardTradingSession in standardTradingSessionList">
+							<td align="center">{{standardTradingSession.tradeSessionId}}</td>
+							<td align="center">
+								<div v-for="timeSpan in standardTradingSession.timeSpans">
+									<span>{{timeSpan.startWeekdayAndTime}} - {{timeSpan.endWeekdayAndTime}}</span>
+								</div>
+							</td>
+							<td align="center">
+								<#if moduleEditable == 1>
+									<a href="#" @click="showEditTradingSessionDialog(standardTradingSession)"><img src="${static_url}/img/icon_edit.png"/></a>
+									&nbsp;&nbsp;&nbsp;
+									<a href="#" @click="showDeleteTradingSessionDialog(standardTradingSession.tradeSessionId)"><img src="${static_url}/img/icon_delete.png"/></a>
+								<#else>
+									<img src="${static_url}/img/icon_edit_disabled.png"/>
+									&nbsp;&nbsp;&nbsp;
+									<img src="${static_url}/img/icon_delete_disabled.png"/>
+								</#if>
+							</td>
+						</tr>
+					</table>
+				</div>
+			<!--</div>-->
+			</div>
+
+			<div class="col-md-6">
+				<span>夏令时</span>
+			<!-- table -->
+			<!--<div class="general_bg_default">-->
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th width="10">Session ID</th>
+							<th width="50">Trading Session</th>
+							<th width="10">操作</th>
+						</tr>
+						<tr v-for="dstTradingSession in dstTradingSessionList">
+							<td align="center">{{dstTradingSession.tradeSessionId}}</td>
+							<td align="center">
+								<div v-for="timeSpan in dstTradingSession.timeSpans">
+									<span>{{timeSpan.startWeekdayAndTime}}-{{timeSpan.endWeekdayAndTime}}</span>
+								</div>
+							</td>
+							<td align="center">
+								<#if moduleEditable == 1>
+									<a href="#" @click="showEditTradingSessionDialog(dstTradingSession)"><img src="${static_url}/img/icon_edit.png"/></a>
+									&nbsp;&nbsp;&nbsp;
+									<a href="#" @click="showDeleteTradingSessionDialog(dstTradingSession.tradeSessionId)"><img src="${static_url}/img/icon_delete.png"/></a>
+								<#else>
+									<img src="${static_url}/img/icon_edit_disabled.png"/>
+									&nbsp;&nbsp;&nbsp;
+									<img src="${static_url}/img/icon_delete_disabled.png"/>
+								</#if>
+							</td>
+						</tr>
+					</table>
+				</div>
+			<!--</div>-->
+			</div>
+			
+		</div>
+	</div>
+
+	<!--     DIALOG AREA      -->
+	<div v-cloak class="dialog" v-if="isAddTradingSessionDialogShow">
+		<div class="dialog_container" style="width: 600px;">
+			<div class="dialog_title">
+				<span style="text-align: center;"><b>添加Trading Session</b></span>
+			</div>
+			<div class="dialog_content">
+				<div>
+					<label class="trade_time_config_dialog_label">时制</label>&nbsp;&nbsp;&nbsp;
+					<select class="trade_time_config_dialog_input" v-model="tradingSesisonAddition.timeSystem">
+						<option value="0">冬令时</option>
+						<option value="1">夏令时</option>
+					</select>
+				</div>
+				<div>
+					<label>交易时段</label>
+				</div>
+				<div class="sled_border">
+					<label class="trade_time_config_dialog_label">复用Trading Session</label>
+					<select class="trade_time_config_dialog_input" v-model="tradingSesisonReused">
+						<option v-for="tradingSession in tradingSessionList" v-bind:value="tradingSession">{{tradingSession.tradeSessionId}}</option>
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label class="trade_time_config_dialog_label">推算规则:</label>
+					<a href="#" @click="addOneDayOverTradingSession(0)"><span class="trade_time_config_dialog_label">加一天</span></a>
+					<a href="#" @click="subtractOneDayOverTradingSession(0)"><span class="trade_time_config_dialog_label">减一天</span></a>
+				</div>
+				<div class="sled_border">
+					<a href="#" @click="addTimeSpan(0)"><span>+添加时段</span></a>
+					<div v-for="(timeSpan, index) in tradingSesisonAddition.timeSpans">
+						<label class="trade_time_config_dialog_label">交易时段{{index}}</label>
+						<select class="trade_time_config_dialog_input" v-model="timeSpan.startDay">
+							<option value="0">星期日</option>
+							<option value="1">星期一</option>
+							<option value="2">星期二</option>
+							<option value="3">星期三</option>
+							<option value="4">星期四</option>
+							<option value="5">星期五</option>
+							<option value="6">星期六</option>
+						</select>
+						<input class="trade_time_config_dialog_input" type="time" v-model="timeSpan.startTime" /></span>
+						<label class="trade_time_config_dialog_label">至</label>
+						<select class="trade_time_config_dialog_input" v-model="timeSpan.endDay">
+							<option value="0">星期日</option>
+							<option value="1">星期一</option>
+							<option value="2">星期二</option>
+							<option value="3">星期三</option>
+							<option value="4">星期四</option>
+							<option value="5">星期五</option>
+							<option value="6">星期六</option>
+						</select>
+						<input class="trade_time_config_dialog_input" type="time" v-model="timeSpan.endTime"/></span>
+
+						<a v-if="index > 0" href="#" @click="showDeleteTimeSpanDialog(0, index)"><img src="${static_url}/img/icon_delete.png"/></a>
+					</div>
+				</div>
+
+			</div>
+			<div class="dialog_btn">
+				<button @click="addTradingSessionConfirm" class="btn">确定</button>
+				<button @click="addTradingSessionCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+
+	<div v-cloak class="dialog" v-if="isEditTradingSessionDialogShow">
+		<div class="dialog_container" style="width: 600px;">
+			<div class="dialog_title">
+				<span style="text-align: center;"><b>编辑Trading Session</b></span>
+			</div>
+			<div class="dialog_content">
+				<div>
+					<label class="trade_time_config_dialog_label">时制</label>&nbsp;&nbsp;&nbsp;
+					<span v-if="tradingSessionEdit.timeSystem == 0">冬令时</span>
+					<span v-else="tradingSessionEdit.timeSystem == 1">夏令时</span>
+					<!--<select class="trade_time_config_dialog_input" v-model="tradingSessionEdit.timeSystem">-->
+						<!--<option value="0">冬令时</option>-->
+						<!--<option value="1">夏令时</option>-->
+					<!--</select>-->
+				</div>
+				<div>
+					<label>交易时段</label>
+				</div>
+				<div class="sled_border">
+					<label class="trade_time_config_dialog_label">复用Trading Session</label>
+					<select class="trade_time_config_dialog_input" v-model="tradingSesisonReused">
+						<option v-for="tradingSession in tradingSessionList" v-bind:value="tradingSession">{{tradingSession.tradeSessionId}}</option>
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label class="trade_time_config_dialog_label">推算规则:</label>
+					<a href="#" @click="addOneDayOverTradingSession(1)"><span class="trade_time_config_dialog_label">加一天</span></a>
+					<a href="#" @click="subtractOneDayOverTradingSession(1)"><span class="trade_time_config_dialog_label">减一天</span></a>
+				</div>
+				<div class="sled_border">
+					<a href="#" @click="addTimeSpan(1)"><span>+添加时段</span></a>
+					<div v-for="(timeSpan, index) in tradingSessionEdit.timeSpans">
+						<label class="trade_time_config_dialog_label">交易时段{{index}}</label>
+						<select class="trade_time_config_dialog_input" v-model="timeSpan.startDay">
+							<option value="0">星期日</option>
+							<option value="1">星期一</option>
+							<option value="2">星期二</option>
+							<option value="3">星期三</option>
+							<option value="4">星期四</option>
+							<option value="5">星期五</option>
+							<option value="6">星期六</option>
+						</select>
+						<input class="trade_time_config_dialog_input" type="time" v-model="timeSpan.startTime" /></span>
+						<label class="trade_time_config_dialog_label">至</label>
+						<select class="trade_time_config_dialog_input" v-model="timeSpan.endDay">
+							<option value="0">星期日</option>
+							<option value="1">星期一</option>
+							<option value="2">星期二</option>
+							<option value="3">星期三</option>
+							<option value="4">星期四</option>
+							<option value="5">星期五</option>
+							<option value="6">星期六</option>
+						</select>
+						<input class="trade_time_config_dialog_input" type="time" v-model="timeSpan.endTime"/></span>
+
+						<a v-if="index > 0" href="#" @click="showDeleteTimeSpanDialog(1, index)"><img src="${static_url}/img/icon_delete.png"/></a>
+					</div>
+				</div>
+
+			</div>
+			<div class="dialog_btn">
+				<button @click="editTradingSessionConfirm" class="btn">确定</button>
+				<button @click="editTradingSessionCancel" class="btn">取消</button>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+	function unlockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeConfigAdmin/unlockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("退出编辑状态");
+					window.location.href='${base_url}/SledTradeTimeConfigAdmin/show?sledCommodityId=${sledCommodityId?c}&exchangeMic=${exchangeMic!""}&sledCommodityCnName=${sledCommodityCnName!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	function lockModule() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledTradeTimeConfigAdmin/lockModuleTradeTime",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("进入编辑状态");
+					window.location.href='${base_url}/SledTradeTimeConfigAdmin/show?sledCommodityId=${sledCommodityId?c}&exchangeMic=${exchangeMic!""}&sledCommodityCnName=${sledCommodityCnName!""}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+
+	window.sledCommodityId = ${sledCommodityId?c};
+</script>
+<script type="text/javascript" src="${static_url}/js/sled.tradetime.config.admin.js"></script>
+</body>
+</html>

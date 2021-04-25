@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>易盛映射管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+</head>
+<body>
+	<div style="height: 20px;"></div>
+	<nav class="nav navbar-default" role="navigation">
+		<div class="collapse navbar-collapse">
+			<div class="nav navbar-nav" style="font-size: 25px;">易盛映射管理</div>
+		</div>
+	</nav>
+	<div style="height: 10px;"></div>
+	
+	<div class="list_container">
+		<table class="table table-striped table-bordered" style="border: 1px;">
+			<tr>
+				<th class="table_nav_key" width="50">券商ID</th>
+				<th class="table_nav_key" width="150">券商</th>
+				<th class="table_nav_key" width="150">最后导入时间</th>
+				<th class="table_nav_key" width="150">版本号</th>
+				<th class="table_nav_key" width="150">MD5</th>
+				<th class="table_nav_key" width="50">导入</th>
+				<th class="table_nav_key" width="50">下载</th>
+				<th class="table_nav_key" width="50">历史</th>
+				<th class="table_nav_key" width="50">详情</th>
+			</tr>
+			<#if commodityMapFileInfoList??>
+				<#list commodityMapFileInfoList as mapFileInfo>
+					<tr>
+						<td align="center">${mapFileInfo.brokerId?c}</td>
+						<td align="center">${mapFileInfo.cnName!""}</td>
+						<td align="center">${mapFileInfo.lastModityTime!""}</td>
+						<td align="center">${mapFileInfo.version!""}</td>
+						<td align="center">${mapFileInfo.fileMD5!""}</td>
+						<td align="center"><a href="javascript:showUploadMappingFileDialog(${mapFileInfo.brokerId?c});"><span class="badge">导入</span></a></td>
+						<td align="center"><a href="${mapFileInfo.url!''}"><span class="badge">下载</span></a></td>
+						<td align="center"><a href="${base_url}/SledCommodityMapHistory/show?brokerEntryId=${mapFileInfo.brokerId?c}&brokerCnName=${mapFileInfo.cnName!''}"><span class="badge">查看</span></a></td>
+						<td align="center"><a href="${base_url}/SledCommodityMapDetail/show?brokerEntryId=${mapFileInfo.brokerId?c}&brokerCnName=${mapFileInfo.cnName!''}"><span class="badge">查看</span></a></td>
+					</tr>
+				</#list>
+			</#if>
+		</table>
+	</div>
+	
+	<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+	<#include "page_nav.html">
+	
+	<div id="upload_mapping_file_dialog">
+		<form id="uploadFileForm" enctype="multipart/form-data" >
+			<input type="hidden" name="broker_entry_id" id="broker_entry_id">
+			<fieldset>
+				<label style="width: 80px" for="mapping_file_version_code">版本号:</label> 
+				<input class="dialog_input_value" type="text" name="mapping_file_version_code" id="mapping_file_version_code">
+			</fieldset>
+			<fieldset>
+				<label style="width: 80px" for="mapping_file_md5_code">MD5:</label> 
+				<input class="dialog_input_value" type="text" name="mapping_file_md5_code" id="mapping_file_md5_code">
+			</fieldset>
+			<fieldset style="position: relative;display: inline-block">
+				<!-- <label style="width: 120px;text-align: right" for="field_file">文件:</label> -->
+				<input style="width: 270px" type="file" name="file" id="field_file">
+			</fieldset>
+			<div id="upload_tips_text" style="display:none">正在上传...</div>
+		</form>
+	</div>
+	
+	<script>
+	$("#upload_mapping_file_dialog").dialog({
+		autoOpen : false,
+		height : 300,
+		width : 500,
+		modal : true,
+		buttons : {
+			"上传" : function() {
+				doUploadMappingFile();
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	function showUploadMappingFileDialog(brokerId) {
+		$("#broker_entry_id").val(brokerId);
+		$("#field_file").val(null);
+		document.getElementById("upload_tips_text").innerHTML="";
+		$("#upload_mapping_file_dialog").dialog("option", "title", "导入映射文件");
+		$("#upload_mapping_file_dialog").dialog("open");
+	}
+	
+	function doUploadMappingFile() {
+		var formData = new FormData(document.getElementById("uploadFileForm"));
+		document.getElementById("upload_tips_text").innerHTML="正在上传...";
+		$('#upload_tips_text').show();
+		$.ajax({
+			url: '${static_url}/UploadCommodityMappingFile',  //server script to process data
+			type: 'POST',
+			data: formData,
+			timeout : 6000000,
+			//Options to tell JQuery not to process data or worry about content-type
+			cache: false,
+			processData: false,  //Add this
+			contentType: false, //Add this
+			success: function(result) {
+				if (result.errorCode == 0) {
+					alert("上传成功");
+					window.location.href='${base_url}/SledCommodityMapAdmin/show';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			error : function(request, textStatus, errorThrow) {
+				if (request.status >= 500) {
+					alert("服务器繁忙，请重试");
+				} else {
+					alert("连接服务器失败，请检查网络");
+				}
+				//window.location.href='${base_url}/SledCommodityMapAdmin/show';
+			},
+			complete : function(data) {
+				$('#upload_tips_text').hidden();
+			}	
+		});
+	}
+	</script>
+</body>
+</html>

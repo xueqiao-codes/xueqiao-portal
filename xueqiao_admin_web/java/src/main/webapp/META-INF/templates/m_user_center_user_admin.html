@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">用户中心</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>用户中心</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<a href="${base_url}/MUserCenterCompanyAdmin/show"><span class="tab_inactive"><b>公司</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<span class="tab_active"><b>用户</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterOrderAdmin/show"><span class="tab_inactive"><b>订单</b></span></a>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add-user" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th width="50">用户ID</th>
+								<th width="50">公司ID</th>
+								<th width="50">用户名</th>
+								<th width="50">手机号</th>
+								<th width="50">中文名</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if companyUserList??>
+								<#list companyUserList as companyUser>
+									<tr>
+										<td>${companyUser.userId}</td>
+										<td>${companyUser.companyId}</td>
+										<td>${companyUser.userName!""}</td>
+										<td>${companyUser.tel!""}</td>
+										<td>${companyUser.cnName!""}</td>
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_user_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">公司ID</label>
+			<input class="dialog_input_value" type="text" name="add_company_id" id="add_company_id">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文名</label>
+			<input class="dialog_input_value" type="text" name="add_cn_name" id="add_cn_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">用户名</label>
+			<input class="dialog_input_value" type="text" name="add_user_name" id="add_user_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">联系手机</label>
+			<input class="dialog_input_value" type="text" name="add_telephone" id="add_telephone">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">密码</label>
+			<input class="dialog_input_value" type="password" name="add_passwd" id="add_passwd">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">确认密码</label>
+			<input class="dialog_input_value" type="password" name="add_passwd_double" id="add_passwd_double">
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#add_user_dialog").dialog({
+		autoOpen : false,
+		height : 350,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var add_company_id = $("#add_company_id").val();
+				var add_cn_name = $("#add_cn_name").val();
+				var add_user_name = $("#add_user_name").val();
+				var add_telephone = $("#add_telephone").val();
+				var add_passwd = $("#add_passwd").val();
+				var add_passwd_double = $("#add_passwd_double").val();
+				
+				if (add_company_id == null || add_company_id == undefined || add_company_id == '') {
+					alert('请输入公司ID');
+					return;
+				}
+				if (add_cn_name == null || add_cn_name == undefined || add_cn_name == '') {
+					alert('请输入中文名');
+					return;
+				}
+				if (add_user_name == null || add_user_name == undefined || add_user_name == '') {
+					alert('请输入用户名');
+					return;
+				}
+				if (add_telephone == null || add_telephone == undefined || add_telephone == '') {
+					alert('请输入手机号');
+					return;
+				}
+				if (add_passwd == null || add_passwd == undefined || add_passwd == '') {
+					alert('请输入密码');
+					return;
+				}
+				if (add_passwd_double == null || add_passwd_double == undefined || add_passwd_double == '') {
+					alert('请确认密码');
+					return;
+				}
+				if (add_passwd != add_passwd_double) {
+					alert('两次密码不一致，请重新输入');
+					$("#add_passwd").val("");
+					$("#add_passwd_double").val("");
+					return;
+				}
+				
+				addUser();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#btn-add-user").click(function( event ) {
+		$("#add_user_dialog").dialog("option", "title", "添加用户");
+		$("#add_user_dialog").dialog("open");
+	});
+	
+	function addUser() {
+		var add_company_id = $("#add_company_id").val();
+		var add_cn_name = $("#add_cn_name").val();
+		var add_user_name = $("#add_user_name").val();
+		var add_telephone = $("#add_telephone").val();
+		var add_passwd = $("#add_passwd").val();
+		
+		var request = {
+				companyId : add_company_id,
+				userName : add_user_name,
+				password : add_passwd,
+				tel : add_telephone,
+				cnName : add_cn_name,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/MUserCenterUserAdmin/addCompanyUser",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/MUserCenterUserAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

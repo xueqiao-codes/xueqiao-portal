@@ -1,0 +1,10 @@
+<!-- page navigation -->
+<div class="page_nav page_nav_vue_nav-center">
+	<label class="page_nav_vue_page_info">第{{currentPage}}页/共{{totalPage}}页&nbsp;&nbsp;共{{totalNum}}条</label>
+	<button class="page_nav_vue_page_control_btn" v-on:click="gotoFirstPage">首页</button>&nbsp;
+	<button class="page_nav_vue_page_control_btn" v-on:click="gotoPreviousPage">上一页</button>&nbsp;
+	<input id="requestPage" class="page_nav_vue_input_conponent" type="text" name="requestPage" v-model="currentPage">&nbsp;
+	<button class="page_nav_vue_page_control_btn" v-on:click="gotoGivenPage">跳转</button>&nbsp;
+	<button class="page_nav_vue_page_control_btn" v-on:click="gotoNextPage">下一页</button>&nbsp;
+	<button class="page_nav_vue_page_control_btn" v-on:click="gotoLastPage">尾页</button>
+</div>

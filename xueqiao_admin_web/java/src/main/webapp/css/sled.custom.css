@@ -1,0 +1,387 @@
+@CHARSET "UTF-8";
+
+body {
+	background: #EEEEEE;
+	min-width: 1700px;
+}
+table{
+table-layout: fixed;
+word-break: break-all;
+word-wrap: break-word;
+}
+
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+
+a:link{
+	text-decoration: none;
+}
+a:visited {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: none;
+}
+a:active {
+	text-decoration: none;
+}
+
+.navigation_bar {
+	display:table;
+	height: 34px;
+	width: 100%;
+	background-color: white;
+}
+
+.navigation_bar_font_default {
+	color: #808080;
+	font-size: 14px;
+}
+
+.navigation_bar_font_link {
+	font-size: 14px;
+}
+
+.general_bg_default {
+	background-color: white;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.title_font {
+	color: #202020;
+	font-size: 24px;
+}
+
+.status_bar_font {
+	color: #303030;
+	font-size: 16px;
+}
+
+.content_title_bar_font {
+	color: #303030;
+	font-size: 20px;
+}
+
+.content_container {
+	width: 100%;
+	background: white;
+}
+
+.content_title_bar {
+	display:table;
+	height: 54px;
+	width: 100%;
+}
+
+.vertical_center {
+	display:table-cell;
+	vertical-align:middle;
+}
+
+.general_margin_left {
+	margin-left: 20px;
+}
+
+.general_margin_left_btn_gap {
+	margin-left: 50px;
+}
+
+.general_margin_right {
+	margin-right: 20px;
+}
+
+.general_margin_top {
+	margin-top: 21px;
+}
+
+.general_margin_bottom {
+	margin-bottom: 21px;
+}
+
+.sled_panel {
+	border-width: 1px;
+	border-style: solid;
+	border-radius:2px;
+	border-color: #CCCCCC;
+	/* width: 100%; */
+	background-color: white;
+}
+
+.sled_border {
+	border-width: 1px;
+	border-style: solid;
+	border-radius:0px;
+	border-color: #CCCCCC;
+	padding: 10px;
+}
+
+.title_bar {
+	display:table;
+	height: 54px;
+	width: 100%;
+	background-color: white;
+}
+
+.status_bar {
+	display:table;
+	height: 54px;
+	width: 100%;
+	background-color: white;
+}
+
+.sled_align_rifht {
+	float: right;
+	text-align:center;
+}
+
+.sled_btn_enable {
+	/* height: 20px;
+	line-height:10px;
+	text-align: center; */
+	
+	background-color: #369EEF;
+    border-width: 1px;
+	border-style: solid;
+	border-radius:5px;
+    color: white;
+    padding: 2px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.sled_btn_disable {
+	/* height: 20px;
+	line-height:10px;
+	text-align: center; */
+	
+	background-color: #CCCCCC;
+    border-width: 1px;
+	border-style: solid;
+	border-radius:5px;
+    color: white;
+    padding: 2px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.sled_link_disable {
+	color: #CCCCCC;
+}
+
+.btn_edit_mode a:link{
+	color: #FFAD65;
+	text-decoration: none;
+}
+.btn_edit_mode a:visited {
+	color: #FFAD65;
+	text-decoration: none;
+}
+.btn_edit_mode a:hover {
+	color: #FFAD65;
+	text-decoration: none;
+}
+
+.btn_edit_mode a:active {
+	color: #FFAD65;
+	text-decoration: none;
+}
+
+.table_nav_key {
+	text-align: center;
+}
+
+.dialog_input_key {
+	width: 120px;
+	height: 20px;
+	text-align: right;
+	font-weight: normal;
+}
+
+.dialog_input_key_2 {
+	width: 100px;
+	height: 20px;
+	text-align: right;
+	font-weight: normal;
+}
+
+.dialog_input_key_long {
+	width: 180px;
+	height: 20px;
+	text-align: right;
+	font-weight: normal;
+}
+
+.dialog_input_value {
+	width: 270px;
+	height: 20px;
+}
+
+.dialog_input_time_value {
+	width: 120px;
+	height: 24px;
+	border-width: 1px;
+	border-radius:2px;
+}
+
+.dialog_input_value_readonly {
+	width: 270px;
+	height: 20px;
+	border: none;
+}
+
+.tab_active {
+	border-width: 5px;
+	border-bottom-style: solid;
+	border-radius:0px;
+	border-color: #369EEF;
+	text-align: center;
+	text-decoration: none;
+	font-size: 24px;
+	color: #202020;
+	height: 54px;
+}
+.tab_inactive {
+	text-align: center;
+	text-decoration: none;
+	font-size: 24px;
+	color: #909090;
+	padding: 5px, 20px;
+}
+.input_conponent {
+	color: #303030;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+	padding: 2px 10px;
+	background: white;
+	height: 26px;
+	text-align: left;
+}
+.flex_row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.page_nav_vue_nav-center {
+	width: 650px;
+	height: auto;
+	margin: 0 auto;
+	margin-top: 50px;
+	margin-bottom: 20px;
+}
+.page_nav_vue_page_info {
+	color: #808080;
+	font-size: 16px;
+	margin-right:50px;
+}
+.page_nav_vue_page_control_btn {
+	color: #369EEF;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #369EEF;
+	padding: 2px 10px;
+	background: white;
+}
+.page_nav_vue_input_conponent {
+	color: #303030;
+	font-size: 16px;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+	border-color: #CCCCCC;
+	padding: 2px 10px;
+	background: white;
+	width: 68px;
+	height: 24px;
+	text-align: center;
+}
+
+.dialog {
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+
+.dialog_container {
+	background: #F8FCFF;
+	position: relative;
+	border-radius: 10px;
+	margin: 0 auto;
+}
+
+.dialog_title {
+	padding-left: 20px;
+	margin-top: 10px;
+	height: 30px;
+}
+
+.dialog_content {
+	padding: 20px;
+	padding-left: 40px;
+	padding-right: 40px;
+	background: white;
+}
+
+.dialog_btn {
+	text-align: right;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-right: 20px;
+}
+
+.dialog_btn button {
+	background: transparent;
+	padding: 2px 30px;
+	border-radius: 5px;
+	border-width : 1px;
+	border-color: lightskyblue;
+	color: lightskyblue;
+	text-decoration: none;
+	width: 100px;
+	display: inline-block;
+}
+
+.dialog_btn button:nth-child(2) {
+	margin-left: 20px;
+}
+
+.dialog_page{
+	position: fixed;
+	left: 0;
+	top: 0;
+	height: 100vh;
+	width: 100vw;
+	background-color: #EEEEEE;
+}
+
+.danger_link_text{
+	color: #FF7C1B;
+}
+
+[v-cloak] { display: none }

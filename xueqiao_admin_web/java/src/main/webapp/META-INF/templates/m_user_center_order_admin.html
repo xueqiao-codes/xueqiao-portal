@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">用户中心</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>用户中心</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<a href="${base_url}/MUserCenterCompanyAdmin/show"><span class="tab_inactive"><b>公司</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterUserAdmin/show"><span class="tab_inactive"><b>用户</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<span class="tab_active"><b>订单</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add-order" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th width="30">orderId</th>
+								<th width="30">source</th>
+								<th width="20">productId</th>
+								<th width="20">companyId</th>
+								<th width="20">companyGroupId</th>
+								<th width="50">productName</th>
+								<th width="100">productDescription</th>
+								<th width="20">productQuantity</th>
+								<th width="30">price</th>
+								<th width="30">currencyType</th>
+								<th width="30">totalAmount</th>
+								<th width="30">payType</th>
+								<th width="50">thirdPartyOrderNo</th>
+								<th width="40">status</th>
+								<th width="200">tradeInfo</th>
+								<th width="20">needOperator</th>
+								<th width="50">operator</th>
+								<th width="50">operation</th>
+								<th width="50">createTimestamp</th>
+								<th width="30">支付</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if orderList??>
+								<#list orderList as order>
+									<tr>
+										<td>${order.orderId}</td>
+										<td>${order.source!""}</td>
+										<td>${order.productId}</td>
+										<td>${order.companyId}</td>
+										<td>${order.companyGroupId}</td>
+										<td>${order.productName!""}</td>
+										<td>${order.productDescription!""}</td>
+										<td>${order.productQuantity}</td>
+										<td>${order.price!""}</td>
+										<td>${order.currencyType!""}</td>
+										<td>${order.totalAmount!""}</td>
+										<td>${order.payType!""}</td>
+										<td>${order.thirdPartyOrderNo!""}</td>
+										<td>${order.status!""}</td>
+										<td>${order.tradeInfo!""}</td>
+										<td>${order.needOperator!""}</td>
+										<td>${order.operator!""}</td>
+										<td>${order.operation!""}</td>
+										<td>${order.createTimestamp!""}</td>
+										<td>
+											<#if order.status == 'CREATED'>
+												<a href="javascript:payOrder(${order.orderId?c});">支付</a>
+											<#else>
+												支付
+											</#if>
+										
+										</td>
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_order_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">source</label>
+			<select class="dialog_input_value" id="add_source" name="add_source">
+				<option value="SITE">SITE</option>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">productId</label>
+			<input class="dialog_input_value" type="text" name="add_product_id" id="add_product_id">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">companyId</label>
+			<input class="dialog_input_value" type="text" name="add_company_id" id="add_company_id">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">companyGroupId</label>
+			<input class="dialog_input_value" type="text" name="add_company_group_id" id="add_company_group_id">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">productName</label>
+			<input class="dialog_input_value" type="text" name="add_product_name" id="add_product_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">productDescription</label>
+			<input class="dialog_input_value" type="text" name="add_product_description" id="add_product_description">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">productQuantity</label>
+			<input class="dialog_input_value" type="text" name="add_product_quantity" id="add_product_quantity">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">price</label>
+			<input class="dialog_input_value" type="text" name="add_price" id="add_price">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">currencyType</label>
+			<select class="dialog_input_value" id="add_currency_type" name="add_currency_type">
+				<option value="XCOIN">XCOIN</option>
+				<option value="RMB">RMB</option>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">totalAmount</label>
+			<input class="dialog_input_value" type="text" name="add_total_amount" id="add_total_amount">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">payType</label>
+			<select class="dialog_input_value" id="add_pay_type" name="add_pay_type"">
+				<option value="INNER">INNER</option>
+				<option value="ALI_PAY">ALI_PAY</option>
+				<option value="WECHAT_PAY">WECHAT_PAY</option>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">thirdPartyOrderNo</label>
+			<input class="dialog_input_value" type="text" name="add_third_party_order_no" id="add_third_party_order_no">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">tradeInfo</label>
+			<input class="dialog_input_value" type="text" name="add_trade_info" id="add_trade_info">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">needOperator</label>
+			<select class="dialog_input_value" id="add_need_operator" name="add_need_operator"">
+				<option value="0">否</option>
+				<option value="1">是</option>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">operator</label>
+			<input class="dialog_input_value" type="text" name="add_operator" id="add_operator">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">operation</label>
+			<input class="dialog_input_value" type="text" name="add_operation" id="add_operation">
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#add_order_dialog").dialog({
+		autoOpen : false,
+		height : 600,
+		width : 450,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				addOrder();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#btn-add-order").click(function( event ) {
+		$("#add_order_dialog").dialog("option", "title", "添加订单");
+		$("#add_order_dialog").dialog("open");
+	});
+	
+	function addOrder() {
+		var add_source = $("#add_source").val();
+		var add_product_id = $("#add_product_id").val();
+		var add_company_id = $("#add_company_id").val();
+		var add_company_group_id = $("#add_company_group_id").val();
+		var add_product_name = $("#add_product_name").val();
+		var add_product_description = $("#add_product_description").val();
+		var add_product_quantity = $("#add_product_quantity").val();
+		var add_price = $("#add_price").val();
+		var add_currency_type = $("#add_currency_type").val();
+		var add_total_amount = $("#add_total_amount").val();
+		var add_pay_type = $("#add_pay_type").val();
+		var add_third_party_order_no = $("#add_third_party_order_no").val();
+		var add_trade_info = $("#add_trade_info").val();
+		var add_need_operator = $("#add_need_operator").val();
+		var add_operator = $("#add_operator").val();
+		var add_operation = $("#add_operation").val();
+		
+		if (add_company_id == null || add_company_id == undefined || add_company_id == '') {
+			add_company_id = 0;
+		}
+		if (add_company_group_id == null || add_company_group_id == undefined || add_company_group_id == '') {
+			add_company_group_id = 0;
+		}
+		
+		var request = {
+				source : add_source,
+				productId : add_product_id,
+				companyId : add_company_id,
+				companyGroupId : add_company_group_id,
+				productName : add_product_name,
+				productDescription : add_product_description,
+				productQuantity : add_product_quantity,
+				price : add_price,
+				currencyType : add_currency_type,
+				totalAmount : add_total_amount,
+				payType : add_pay_type,
+				thirdPartyOrderNo : add_third_party_order_no,
+				tradeInfo : add_trade_info,
+				needOperator : add_need_operator,
+				operator : add_operator,
+				operation : add_operation,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/MUserCenterOrderAdmin/addOrder",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/MUserCenterOrderAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function payOrder(orderId) {
+		if (confirm("确认支付？")) {
+			window.location.href='${base_url}/MUserCenterOrderPayPage/show?orderId=' + orderId;
+			/* $.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/MUserCenterOrderAdmin/payOrder",
+				data : {
+					orderId : orderId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					console.log(result);
+					alert("支付成功");
+					//window.location.href='${base_url}/MUserCenterOrderAdmin/show';
+				},
+				complete : function(data) {
+				}
+			}); */
+		}
+	}
+	</script>
+</body>
+</html>

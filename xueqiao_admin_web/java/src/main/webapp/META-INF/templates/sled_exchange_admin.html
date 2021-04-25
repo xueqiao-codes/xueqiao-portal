@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易所管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">交易所管理</span>
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode">
+				<#if moduleEditable == 1>
+					<a href="javascript:unlockModule();">退出编辑状态并同步</a>
+				<#elseif moduleEditable == 2>
+					<span>${lockModule!""}模块在编辑中</span>
+				<#elseif moduleEditable == 3>
+					<span>${lockUserName}在编辑${lockModule!""}模块</span>
+				<#else>
+				<a href="javascript:lockModule();">进入编辑状态</a>
+				</#if>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>交易所管理</b></span>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<span class="general_margin_left">中文名称：<input type=text id="cnName" class="input_conponent" style="width: 150px" value="${cnName!''}" /></span>&nbsp;
+					<span>英文简称：<input type=text id="acronym" class="input_conponent" style="width: 150px" value="${acronym!''}"/></span>&nbsp;
+					<span>中文简称：<input type=text id="cnAcronym" class="input_conponent" style="width: 150px" value="${cnAcronym!''}"/></span>&nbsp;
+					<button id="submit_option_button" class="sled_btn_enable">查询</button>
+				
+					<div class="sled_align_rifht general_margin_right">
+						<#if moduleEditable == 1>
+							<button id="btn-add-exchange" class="sled_btn_enable">添加</button>
+						<#else>
+							<button id="btn-add-exchange" class="sled_btn_disable" disabled="disabled">添加</button>
+						</#if>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<#if sledExchangeList??>
+						<table class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th class="table_nav_key" width="50">国家</th>
+								<th class="table_nav_key" width="50">城市</th>
+								<th class="table_nav_key" width="100">中文名称</th>
+								<th class="table_nav_key" width="50">英文简称</th>
+								<th class="table_nav_key" width="50">MIC</th>
+								<th class="table_nav_key" width="50">OPERATING MIC</th>
+								<th class="table_nav_key" width="50">中文简称</th>
+								<th class="table_nav_key" width="150">英文全称</th>
+								<th class="table_nav_key" width="150">网址</th>
+								<th class="table_nav_key" width="50">时区</th>
+								<th class="table_nav_key" width="50">商品</th>
+								<th class="table_nav_key" width="50">编辑</th>
+								<th class="table_nav_key" width="50">删除</th>
+							</tr>
+							<#list sledExchangeList as sledExchange>
+							<tr>
+								<td align="center">${sledExchange.country}</td>
+								<td align="center">${sledExchange.city}</td>
+								<td align="center">${sledExchange.cnName}</td>
+								<td align="center">${sledExchange.acronym}</td>
+								<td align="center">${sledExchange.exchangeMic}</td>
+								<td align="center">${sledExchange.operatingMic}</td>
+								<td align="center">${sledExchange.cnAcronym}</td>
+								<td align="center">${sledExchange.nameInstitution}</td>
+								<td align="center">${sledExchange.website}</td>
+								<td align="center">${sledExchange.zoneId!""}</td>
+								<td align="center"><a href="${base_url}/SledCommodityAdmin/show?exchangeMic=${sledExchange.exchangeMic}&exchangeCNName=${sledExchange.cnName}"><span>查看</span></a></td>
+								
+								<#if moduleEditable == 1>
+									<td align="center"><a href="javascript:showModifyExchangeDialog(${sledExchange.sledExchangeId?c});"><img src="${static_url}/img/icon_edit.png"/></a></td>
+									<td align="center"><a href="javascript:showDeleteExchangeDialog(${sledExchange.sledExchangeId?c});"><img src="${static_url}/img/icon_delete.png"/></a></td>
+								<#else>
+									<td align="center"><img src="${static_url}/img/icon_edit_disabled.png"/></td>
+									<td align="center"><img src="${static_url}/img/icon_delete_disabled.png"/></td>
+								</#if>
+							</tr>
+							</#list>
+						</table>
+					<#else> 没有数据  </#if>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+		
+	</div>
+
+	<div id="add_exchange_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">MIC</label> <input
+				class="dialog_input_value" type="text" name="add_mic" id="add_mic"
+				style="text-transform: uppercase;"
+				onKeyUp="if(this.value.length>4){this.value=this.value.substr(0,4)};this.value=this.value.replace(/[^a-zA-Z]/g,'');">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">OPERATING
+				MIC</label> <input class="dialog_input_value" type="text"
+				name="add_operating_mic" id="add_operating_mic"
+				style="text-transform: uppercase;"
+				onKeyUp="if(this.value.length>4){this.value=this.value.substr(0,4)};this.value=this.value.replace(/[^a-zA-Z]/g,'');">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">国家</label> <input
+				class="dialog_input_value" type="text" name="add_country"
+				id="add_country" list="list_countries">
+			<datalist id="list_countries">
+				<option value="ALBANIA" />
+				<option value="ALGERIA" />
+				<option value="ANGOLA" />
+				<option value="ARGENTINA" />
+				<option value="ARMENIA" />
+				<option value="AUSTRALIA" />
+				<option value="AUSTRIA" />
+				<option value="AZERBAIJAN" />
+				<option value="BAHAMAS" />
+				<option value="BAHRAIN" />
+				<option value="BANGLADESH" />
+				<option value="BARBADOS" />
+				<option value="BELARUS" />
+				<option value="BELGIUM" />
+				<option value="BERMUDA" />
+				<option value="BOLIVIA" />
+				<option value="OSNIA AND HERZEGOVINA" />
+				<option value="BOTSWANA" />
+				<option value="BRAZIL" />
+				<option value="BULGARIA" />
+				<option value="CAMBODIA" />
+				<option value="CAMEROON" />
+				<option value="CANADA" />
+				<option value="CAPE VERDE" />
+				<option value="CAYMAN ISLANDS" />
+				<option value="CHILE" />
+				<option value="CHINA" />
+				<option value="COLOMBIA" />
+				<option value="COSTA RICA" />
+				<option value="CROATIA" />
+				<option value="CURACAO" />
+				<option value="CYPRUS" />
+				<option value="CZECH REPUBLIC" />
+				<option value="DENMARK" />
+				<option value="DOMINICAN REPUBLIC" />
+				<option value="ECUADOR" />
+				<option value="EGYPT" />
+				<option value="EL SALVADOR" />
+				<option value="ESTONIA" />
+				<option value="FAROE ISLANDS" />
+				<option value="FIJI" />
+				<option value="FINLAND" />
+				<option value="FRANCE" />
+				<option value="GEORGIA" />
+				<option value="GERMANY" />
+				<option value="GHANA" />
+				<option value="GIBRALTAR" />
+				<option value="GREECE" />
+				<option value="GUATEMALA" />
+				<option value="GUERNSEY, C.I." />
+				<option value="GUYANA" />
+				<option value="HONDURAS" />
+				<option value="HONG KONG" />
+				<option value="HUNGARY" />
+				<option value="ICELAND" />
+				<option value="INDIA" />
+				<option value="INDONESIA" />
+				<option value="IRAN" />
+				<option value="IRAQ" />
+				<option value="IRELAND" />
+				<option value="ISRAEL" />
+				<option value="ITALY" />
+				<option value="IVORY COAST" />
+				<option value="JAMAICA" />
+				<option value="JAPAN" />
+				<option value="JORDAN" />
+				<option value="KAZAKHSTAN" />
+				<option value="KENYA" />
+				<option value="KOREA, REPUBLIC OF" />
+				<option value="KUWAIT" />
+				<option value="KYRGYZSTAN" />
+				<option value="LAOS" />
+				<option value="LATVIA" />
+				<option value="LEBANON" />
+				<option value="LIBYAN ARAB JAMAHIRIYA" />
+				<option value="LIECHTENSTEIN" />
+				<option value="LITHUANIA" />
+				<option value="LUXEMBOURG" />
+				<option value="MACEDONIA" />
+				<option value="MADAGASCAR" />
+				<option value="MALAWI" />
+				<option value="MALAYSIA" />
+				<option value="MALDIVES" />
+				<option value="MALTA" />
+				<option value="MAURITIUS" />
+				<option value="MEXICO" />
+				<option value="MOLDOVA, REPUBLIC OF" />
+				<option value="MONGOLIA" />
+				<option value="MONTENEGRO, REPUBLIC OF" />
+				<option value="MOROCCO" />
+				<option value="MOZAMBIQUE" />
+				<option value="NAMIBIA" />
+				<option value="NEPAL" />
+				<option value="NEW ZEALAND" />
+				<option value="NICARAGUA" />
+				<option value="NIGERIA" />
+				<option value="NORWAY" />
+				<option value="OMAN" />
+				<option value="PAKISTAN" />
+				<option value="PALESTINIAN TERRITORY, OCCUPIED" />
+				<option value="PANAMA" />
+				<option value="PAPUA NEW GUINEA" />
+				<option value="PARAGUAY" />
+				<option value="PERU" />
+				<option value="PHILIPPINES" />
+				<option value="POLAND" />
+				<option value="PORTUGAL" />
+				<option value="QATAR" />
+				<option value="REPUBLIC OF SEYCHELLES" />
+				<option value="ROMANIA" />
+				<option value="RUSSIA" />
+				<option value="RWANDA" />
+				<option value="SAINT KITTS AND NEVIS" />
+				<option value="SAUDI ARABIA" />
+				<option value="SERBIA (REPUBLIC OF)" />
+				<option value="SINGAPORE" />
+				<option value="SLOVAKIA" />
+				<option value="SLOVENIA" />
+				<option value="SOUTH AFRICA" />
+				<option value="SPAIN" />
+				<option value="SRI LANKA" />
+				<option value="SUDAN" />
+				<option value="SWAZILAND" />
+				<option value="SWEDEN" />
+				<option value="SWITZERLAND" />
+				<option value="SYRIAN ARAB REPUBLIC" />
+				<option value="TAIWAN" />
+				<option value="TANZANIA" />
+				<option value="THAILAND" />
+				<option value="THE NETHERLANDS" />
+				<option value="TRINIDAD AND TOBAGO" />
+				<option value="TUNISIA" />
+				<option value="TURKEY" />
+				<option value="UGANDA" />
+				<option value="UKRAINE" />
+				<option value="UNITED ARAB EMIRATES" />
+				<option value="UNITED KINGDOM" />
+				<option value="UNITED STATES OF AMERICA" />
+				<option value="URUGUAY" />
+				<option value="UZBEKISTAN" />
+				<option value="VANUATU" />
+				<option value="VENEZUELA" />
+				<option value="VIET NAM" />
+				<option value="ZAMBIA" />
+				<option value="ZIMBABWE" />
+				<option value="ZZ" />
+			</datalist>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">城市</label> <input
+				class="dialog_input_value" type="text" name="add_city" id="add_city"
+				list="list_cities">
+			<datalist id="list_cities">
+				<option value="SHANGHAI" />
+				<option value="DALIAN" />
+				<option value="ZHENGZHOU" />
+				<option value="CHICAGO" />
+				<option value="HONG KONG" />
+				<option value="SINGAPORE" />
+				<option value="LONDON" />
+				<option value="TOKYO" />
+				<option value="OSAKA" />
+				<option value="NEW YORK" />
+				<option value="ATLANTA" />
+				<option value="WINNIPEG" />
+				<option value="KUALA LUMPUR" />
+				<option value="DUBAI" />
+				<option value="FRANKFURT" />
+				<option value="PARIS" />
+				<option value="SYDNEY" />
+				<option value="SEOUL" />
+				<option value="BANGKOK" />
+			</datalist>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文名称</label> <input
+				class="dialog_input_value" type="text" name="add_name_cn_full"
+				id="add_name_cn_full">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文简称</label> <input
+				class="dialog_input_value" type="text" name="add_name_cn_acronym"
+				id="add_name_cn_acronym">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文全称</label> <input
+				class="dialog_input_value" type="text" name="add_name_en_full"
+				id="add_name_en_full">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文简称</label> <input
+				class="dialog_input_value" type="text" name="add_name_en_acronym"
+				id="add_name_en_acronym" style="text-transform: uppercase;">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">网址</label> <input
+				class="dialog_input_value" type="text" name="add_web_site"
+				id="add_web_site">
+		</fieldset>
+	</div>
+
+	<div id="modify_exchange_dialog">
+		<input type="hidden" name="sled_exchange_id" id="sled_exchange_id">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">MIC</label> <input
+				class="dialog_input_value_readonly" type="text" name="modify_mic"
+				id="modify_mic" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">OPERATING
+				MIC</label> <input class="dialog_input_value_readonly" type="text"
+				name="modify_operating_mic" id="modify_operating_mic"
+				readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">国家</label> <input
+				class="dialog_input_value_readonly" type="text"
+				name="modify_country" id="modify_country" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">城市</label> <input
+				class="dialog_input_value_readonly" type="text" name="modify_city"
+				id="modify_city" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文名称</label> <input
+				class="dialog_input_value" type="text" name="modify_name_cn_full"
+				id="modify_name_cn_full">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文简称</label> <input
+				class="dialog_input_value" type="text" name="modify_name_cn_acronym"
+				id="modify_name_cn_acronym">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文全称</label> <input
+				class="dialog_input_value" type="text" name="modify_name_en_full"
+				id="modify_name_en_full">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文简称</label> <input
+				class="dialog_input_value" type="text" name="modify_name_en_acronym"
+				id="modify_name_en_acronym" style="text-transform: uppercase;">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">网址</label> <input
+				class="dialog_input_value" type="text" name="modify_web_site"
+				id="modify_web_site">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">时区：</label>
+			<input class="dialog_input_value" type="text" id="time_zone" name="time_zone" list="time_zone_list" />
+			<#if zoneIdList??>
+				<datalist id="time_zone_list">
+					<#list zoneIdList as zoneId>
+						<option value=${zoneId!""} />
+					</#list>
+				</datalist>
+			</#if>
+		</fieldset>
+	</div>
+
+	<script>
+	
+	$("#submit_option_button").click(function() {
+		var cnName = $.trim($("#cnName").val());
+		var acronym = $.trim($("#acronym").val());
+		var cnAcronym = $.trim($("#cnAcronym").val());
+		
+		var queryUrl = "${base_url}/SledExchangeAdmin/show?cnName=" + cnName
+			+ "&acronym=" + acronym
+			+ "&cnAcronym=" + cnAcronym;
+		window.location.href = queryUrl;
+	});
+	
+$("#add_exchange_dialog").dialog({
+	autoOpen : false,
+	height : 400,
+	width : 500,
+	modal : true,
+	buttons : {
+		"确定" : function() {
+			
+			var mic = $("#add_mic").val();
+			var operating_mic = $("#add_operating_mic").val();
+			var country = $("#add_country").val();
+			var city = $("#add_city").val();
+			var name_cn_full = $("#add_name_cn_full").val();
+			var name_cn_acronym = $("#add_name_cn_acronym").val();
+			var name_en_full = $("#add_name_en_full").val();
+			var name_en_acronym = $("#add_name_en_acronym").val();
+			var web_site = $("#add_web_site").val();
+			
+			if (mic == null || mic == undefined || mic == '') {
+				alert('请输入MIC');
+				return;
+			}
+			if (operating_mic == null || operating_mic == undefined || operating_mic == '') {
+				alert('请输入OPERATING MIC');
+				return;
+			}
+			if (country == null || country == undefined || country == '') {
+				alert('请输入国家');
+				return;
+			}
+			if (city == null || city == undefined || city == '') {
+				alert('请输入城市');
+				return;
+			}
+			if (name_cn_full == null || name_cn_full == undefined || name_cn_full == '') {
+				alert('请输入中文名称');
+				return;
+			}
+			if (name_cn_acronym == null || name_cn_acronym == undefined || name_cn_acronym == '') {
+				alert('请输入中文简称');
+				return;
+			}
+			if (name_en_full == null || name_en_full == undefined || name_en_full == '') {
+				alert('请输入英文名称');
+				return;
+			}
+			if (name_en_acronym == null || name_en_acronym == undefined || name_en_acronym == '') {
+				alert('请输入英文简称');
+				return;
+			}
+			if (web_site == null || web_site == undefined || web_site == '') {
+				alert('请输入网址');
+				return;
+			}
+			
+			addSledExchange();
+			
+			$(this).dialog("close");
+		},
+		"取消" : function() {
+			$(this).dialog("close");
+		}
+	}
+});
+
+$("#modify_exchange_dialog").dialog({
+	autoOpen : false,
+	height : 400,
+	width : 500,
+	modal : true,
+	buttons : {
+		"保存" : function() {
+			
+			var mic = $("#modify_mic").val();
+			var operating_mic = $("#modify_operating_mic").val();
+			var country = $("#modify_country").val();
+			var city = $("#modify_city").val();
+			var name_cn_full = $("#modify_name_cn_full").val();
+			var name_cn_acronym = $("#modify_name_cn_acronym").val();
+			var name_en_full = $("#modify_name_en_full").val();
+			var name_en_acronym = $("#modify_name_en_acronym").val();
+			var web_site = $("#modify_web_site").val();
+			var time_zone = $("#time_zone").val();
+			
+			if (mic == null || mic == undefined || mic == '') {
+				alert('请输入MIC');
+				return;
+			}
+			if (operating_mic == null || operating_mic == undefined || operating_mic == '') {
+				alert('请输入OPERATING MIC');
+				return;
+			}
+			if (country == null || country == undefined || country == '') {
+				alert('请输入国家');
+				return;
+			}
+			if (city == null || city == undefined || city == '') {
+				alert('请输入城市');
+				return;
+			}
+			if (name_cn_full == null || name_cn_full == undefined || name_cn_full == '') {
+				alert('请输入中文名称');
+				return;
+			}
+			if (name_cn_acronym == null || name_cn_acronym == undefined || name_cn_acronym == '') {
+				alert('请输入中文简称');
+				return;
+			}
+			if (name_en_full == null || name_en_full == undefined || name_en_full == '') {
+				alert('请输入英文名称');
+				return;
+			}
+			if (name_en_acronym == null || name_en_acronym == undefined || name_en_acronym == '') {
+				alert('请输入英文简称');
+				return;
+			}
+			if (web_site == null || web_site == undefined || web_site == '') {
+				alert('请输入网址');
+				return;
+			}
+			if (time_zone == null || time_zone == undefined || time_zone == '') {
+				alert('请输入时区');
+				return;
+			}
+			
+			modifySledExchange();
+			
+			$(this).dialog("close");
+		},
+		"取消" : function() {
+			$(this).dialog("close");
+		}
+	}
+});
+
+$("#btn-add-exchange").click(function( event ) {
+	$("#add_exchange_dialog").dialog("option", "title", "添加交易所");
+	$("#add_exchange_dialog").dialog("open");
+	event.preventDefault();
+});
+
+function showModifyExchangeDialog(sledExchangeId) {
+	$("#modify_exchange_dialog").dialog("option", "title", "编辑交易所");
+	$("#modify_exchange_dialog").dialog("open");
+	$("#sled_exchange_id").val(sledExchangeId);
+	
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledExchangeAdmin/getSledExchange",
+		data : {
+			sledExchangeId : sledExchangeId,
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			console.log(result);
+			//$("#sled_exchange_id").val(sledExchangeId);
+			$("#modify_mic").val(result.exchangeMic);
+			$("#modify_operating_mic").val(result.operatingMic);
+			$("#modify_country").val(result.country);
+			
+			$("#modify_city").val(result.city);
+			$("#modify_name_cn_full").val(result.cnName);
+			$("#modify_name_cn_acronym").val(result.cnAcronym);
+			
+			$("#modify_name_en_full").val(result.nameInstitution);
+			$("#modify_name_en_acronym").val(result.acronym);
+			$("#modify_web_site").val(result.website);
+			$("#time_zone").val(result.zoneId);
+		},
+		complete : function(data) {
+		}
+	});
+	
+	
+	
+}
+
+function unlockModule() {
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledExchangeAdmin/unlockModuleContract",
+		data : {
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			if (result.errorCode == 0) {
+				alert("退出编辑状态");
+				window.location.href='${base_url}/SledExchangeAdmin/show?requestPage=${currentPage}';
+			} else {
+				alert(result.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+function lockModule() {
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledExchangeAdmin/lockModuleContract",
+		data : {
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			if (result.errorCode == 0) {
+				alert("进入编辑状态");
+				window.location.href='${base_url}/SledExchangeAdmin/show?requestPage=${currentPage}';
+			} else {
+				alert(result.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+function showDeleteExchangeDialog(sledExchangeId) {
+	if (confirm("确认删除？")) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledExchangeAdmin/deleteSledExchange",
+			data : {
+				sledExchangeId : sledExchangeId,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("删除成功");
+					window.location.href='${base_url}/SledExchangeAdmin/show?requestPage=${currentPage}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+}
+
+function showCommodityAdminPage(exchangeMic){
+	
+	alert(exchangeMic);
+	
+	var request = {
+			exchangeMic : exchangeMic,
+			commodityType : 'FUTURES',
+		};
+	
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledCommodityAdmin/show",
+		data : JSON.stringify(request),
+		contentType : "application/json",
+		timeout : 60000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(data) {
+			//if (data.errorCode == 0) {
+			//	alert("操作成功");
+			//	window.location.href='${base_url}/SledExchangeAdmin/show';
+			//} else {
+			//	alert(data.errorMsg);
+			//}
+		},
+		complete : function(data) {
+		}
+	});
+	
+}
+
+function addSledExchange() {
+	var mic = $("#add_mic").val();
+	var operating_mic = $("#add_operating_mic").val();
+	var country = $("#add_country").val();
+	var city = $("#add_city").val();
+	var name_cn_full = $("#add_name_cn_full").val();
+	var name_cn_acronym = $("#add_name_cn_acronym").val();
+	var name_en_full = $("#add_name_en_full").val();
+	var name_en_acronym = $("#add_name_en_acronym").val();
+	var web_site = $("#add_web_site").val();
+	
+	var request = {
+			exchangeMic : mic,
+			operatingMic : operating_mic,
+			country : country,
+			city : city,
+			cnName : name_cn_full,
+			cnAcronym : name_cn_acronym,
+			nameInstitution : name_en_full,
+			acronym : name_en_acronym,
+			website : web_site,
+		};
+	
+	$.ajax({
+		type : "POST",
+		url : "${base_url}/SledExchangeAdmin/addSledExchange",
+		data : JSON.stringify(request),
+		contentType : "application/json",
+		dataType : "json",
+		timeout : 60000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(data) {
+			if (data.errorCode == 0) {
+				alert("添加成功");
+				window.location.href='${base_url}/SledExchangeAdmin/show';
+			} else {
+				alert(data.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+function modifySledExchange() {
+
+	var sled_exchange_id = $("#sled_exchange_id").val();
+	var name_cn_full = $("#modify_name_cn_full").val();
+	var name_cn_acronym = $("#modify_name_cn_acronym").val();
+	var name_en_full = $("#modify_name_en_full").val();
+	var name_en_acronym = $("#modify_name_en_acronym").val();
+	var web_site = $("#modify_web_site").val();
+	var time_zone = $("#time_zone").val();
+	
+	var request = {
+			sledExchangeId : sled_exchange_id,
+			cnName : name_cn_full,
+			cnAcronym : name_cn_acronym,
+			nameInstitution : name_en_full,
+			acronym : name_en_acronym,
+			website : web_site,
+			zoneId : time_zone,
+		};
+	
+	$.ajax({
+		type : "POST",
+		url : "${base_url}/SledExchangeAdmin/updateSledExchange",
+		data : JSON.stringify(request),
+		contentType : "application/json",
+		dataType : "json",
+		timeout : 60000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(data) {
+			if (data.errorCode == 0) {
+				alert("修改成功");
+				window.location.href='${base_url}/SledExchangeAdmin/show?requestPage=${currentPage}';
+			} else {
+				alert(data.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+</script>
+
+	<script type="text/javascript">
+
+$(document).ready(function() {
+	
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>服务器管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<!-- <script type="text/javascript" src="${static_url}/js/vue.min.js"></script> -->
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">服务器管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>服务器管理</b></span>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<!-- <div class="general_margin_left"> -->
+						<span class="general_margin_left">服务器ID：<input type=text id="machineId" class="input_conponent" style="width: 150px" <#if machineId != 0>value="${machineId?c}"</#if> /></span>&nbsp;
+						<span>外网IP地址：<input type=text id="publicIpAddress" class="input_conponent" style="width: 150px" value="${publicIpAddress!''}"/></span>&nbsp;
+						<span>私有IP地址：<input type=text id="innerIpAddress" class="input_conponent" style="width: 150px" value="${innerIpAddress!''}"/></span>&nbsp;
+						<span>分配状态：</span>
+						<select id="machineAssignStatus" name="machineAssignStatus" class="input_conponent" style="width: 150px" value="${machineAssignStatus!''}">
+							<option value=""></option>
+							<option value="RAW" <#if machineAssignStatus == "RAW">selected="true"</#if>>RAW</option>
+							<option value="NOT_ASSIGNED" <#if machineAssignStatus == "NOT_ASSIGNED">selected="true"</#if>>NOT_ASSIGNED</option>
+							<option value="ASSIGNED_UNINITED" <#if machineAssignStatus == "ASSIGNED_UNINITED">selected="true"</#if>>ASSIGNED_UNINITED</option>
+							<option value="ASSIGNED" <#if machineAssignStatus == "ASSIGNED">selected="true"</#if>>ASSIGNED</option>
+						</select>
+						<button id="submit_option_button" class="sled_btn_enable">查询</button>
+					<!-- </div> -->
+				
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-refresh" class="sled_btn_enable">刷新</button>
+						<button id="btn-add-server" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="30">服务器ID</th>
+							<th class="table_nav_key" width="50">实例名称</th>
+							<!--<th class="table_nav_key" width="50">所在可用区</th>-->
+							<th class="table_nav_key" width="70">IP地址</th>
+							<!--<th class="table_nav_key" width="50">运行状态</th>-->
+							<th class="table_nav_key" width="30">网络类型</th>
+							<th class="table_nav_key" width="60">配置</th>
+							<!--<th class="table_nav_key" width="50">付费方式</th>-->
+							<th class="table_nav_key" width="50">到期时间</th>
+							<th class="table_nav_key" width="30">托管机状态</th>
+							<th class="table_nav_key" width="30">公司ID</th>
+							<th class="table_nav_key" width="60">公司登录名</th>
+							<th class="table_nav_key" width="30">托管服务ID</th>
+							<th class="table_nav_key" width="60">服务组名</th>
+							<th class="table_nav_key" width="30">操作</th>
+						</tr>
+						<#if hostingMachineInfoList??>
+							<#list hostingMachineInfoList as hostingMachineInfo>
+								<tr>
+									<td align="center">${hostingMachineInfo.machineId?c}</td>
+									<td align="center">${hostingMachineInfo.machineHostname!""}</td>
+									<!--<td align="center">${hostingMachineInfo.zoneId!""}</td>-->
+									<td align="center"><a href="${base_url}/SledHostingDebug/show?hostingIP=${hostingMachineInfo.innerIpAddress!''}">${hostingMachineInfo.ipAddress!""}</a></td>
+									<!--<td align="center">${hostingMachineInfo.runningStatus!""}</td>-->
+									<td align="center">${hostingMachineInfo.instanceNetworkType!""}</td>
+									<td align="center">${hostingMachineInfo.machineSpec!""}</td>
+									<!--<td align="center">${hostingMachineInfo.instanceChargeType!""}</td>-->
+									<td align="center">${hostingMachineInfo.aliyunExpiredTime!""}</td>
+									<td align="center">${hostingMachineInfo.hostingStatus!""}</td>
+									<td align="center">${hostingMachineInfo.companyId}</td>
+									<td align="center">${hostingMachineInfo.companyCode!""}</td>
+									<td align="center">${hostingMachineInfo.companyGroupId}</td>
+									<td align="center">${hostingMachineInfo.groupName!""}</td>
+									<td align="center">
+										<!--<span>初始化</span>-->
+										<!--</br>-->
+										<a href="javascript:showDeleteHostingMachineDialog(${hostingMachineInfo.machineId?c});">移除</a>
+									</td>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_server_dialog">
+		<!-- <table class="table table-bordered" style="border: 1px;">
+			<tr bgColor=#F8FCFF>
+				<th class="table_nav_key" width="50"><input type="checkbox"></th>
+				<th class="table_nav_key" width="50">实例ID/名称</th>
+				<th class="table_nav_key" width="50">标签</th>
+				<th class="table_nav_key" width="50">所在可用区</th>
+				<th class="table_nav_key" width="50">IP地址</th>
+				<th class="table_nav_key" width="50">运行状态</th>
+				<th class="table_nav_key" width="50">网络类型</th>
+				<th class="table_nav_key" width="50">配置</th>
+				<th class="table_nav_key" width="50">付费方式</th>
+				<th class="table_nav_key" width="50">到期时间</th>
+			</tr>
+		</table> -->
+	</div>
+
+
+	<script>
+	
+	$("#add_server_dialog").dialog({
+		autoOpen : false,
+		height : 600,
+		width : 1400,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				addEcsInstanceInfo();
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#btn-add-server").click(function( event ) {
+		$("#add_server_dialog").dialog("option", "title", "添加服务器");
+		$("#add_server_dialog").dialog("open");
+		
+		getEcsInstanceInfo();
+		
+		event.preventDefault();
+	});
+	
+	$("#btn-refresh").click(function( event ) {
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledServerAdmin/syncEcsInstance",
+			data : {
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				if (result.errorMsg) {
+					alert(result.errorMsg);
+				} else {
+					alert('刷新成功');
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	});
+	
+	$("#submit_option_button").click(function() {
+		var machineId = $.trim($("#machineId").val());
+		var innerIpAddress = $.trim($("#innerIpAddress").val());
+		var publicIpAddress = $.trim($("#publicIpAddress").val());
+		var machineAssignStatus = $.trim($("#machineAssignStatus").val());
+		
+		var queryUrl = "${base_url}/SledServerAdmin/show?machineId=" + machineId
+			+ "&innerIpAddress=" + innerIpAddress
+			+ "&publicIpAddress=" + publicIpAddress
+			+ "&machineAssignStatus=" + machineAssignStatus;
+		window.location.href = queryUrl;
+	});
+	
+	function getEcsInstanceInfo() {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledServerAdmin/getEcsInstanceInfo",
+			data : {
+			},
+			timeout : 10000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				refreshEcsInstanceInfoDialogContent(result);
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function refreshEcsInstanceInfoDialogContent(result) {
+		var ecs_instance_info_dialog_content = "<table class='table table-bordered' style='border: 1px;'>" +
+				"<tr bgColor=#F8FCFF>" +
+				"<th class='table_nav_key' width='50'><input type='checkbox' id='selectAll' name='selectAll' onclick='onSelectAll(event)'></th>" +
+				"<th class='table_nav_key' width='50'>实例ID/名称</th>" +
+				"<th class='table_nav_key' width='50'>标签</th>" +
+				"<th class='table_nav_key' width='50'>所在可用区</th>" +
+				"<th class='table_nav_key' width='50'>IP地址</th>" +
+				"<th class='table_nav_key' width='50'>运行状态</th>" +
+				"<th class='table_nav_key' width='50'>网络类型</th>" +
+				"<th class='table_nav_key' width='50'>配置</th>" +
+				"<th class='table_nav_key' width='50'>付费方式</th>" +
+				"<th class='table_nav_key' width='50'>到期时间</th>" +
+				"</tr>";
+		
+		//alert(result);
+		
+		for (index in result) {
+			var ecsInstanceInfo = result[index];
+			//alert(/*ecsInstanceInfo。memoryGB + ecsInstanceInfo。outIfBandMB + ecsInstanceInfo.instanceChargeType
+			//		+ ecsInstanceInfo.aliyunExpiredTime */);
+			ecs_instance_info_dialog_content = ecs_instance_info_dialog_content + "<tr>" +
+				"<td align='center'><input type='checkbox' name='ecsInstanceList' value=" + ecsInstanceInfo.aliyunInstanceId + "></td>" +
+				"<td align='center'>" + ecsInstanceInfo.aliyunInstanceId + " / " + ecsInstanceInfo.instanceName + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.tags + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.zoneId + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.innerIpAddress + "</br>" +  ecsInstanceInfo.publicIpAddress + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.runningStatus + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.instanceNetworkType + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.machineSpec + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.instanceChargeType + "</td>" +
+				"<td align='center'>" + ecsInstanceInfo.aliyunExpiredTime + "</td>" +
+				"</tr>";
+		}
+		
+		ecs_instance_info_dialog_content = ecs_instance_info_dialog_content + "</table> ";
+		
+		$("#add_server_dialog").html(ecs_instance_info_dialog_content);
+	}
+	
+	function onSelectAll(event) {
+		var isCheck=$("#selectAll").is(':checked');
+		$("[name='ecsInstanceList']").each(function() {
+			this.checked = isCheck;
+		});
+	}
+	
+	function addEcsInstanceInfo() {
+		// commodity list
+		var groupEcsInstance = $("[name='ecsInstanceList']").filter(":checked");
+		var ecsInstanceList = new Array();
+		for(var i = 0; i < groupEcsInstance.length; i++){
+			if(groupEcsInstance[i].checked) {
+				ecsInstanceList.push(groupEcsInstance[i].value);
+			}
+		}
+		
+		var request = {
+				ecsInstanceIdList : ecsInstanceList,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledServerAdmin/addEcsInstanceInfo",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/SledServerAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function showDeleteHostingMachineDialog(machineId) {
+		if (confirm("确认删除？")) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledServerAdmin/deleteHostingMachine",
+				data : {
+					machineId : machineId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络');
+					}
+				},
+				success : function(result) {
+					if (result.errorCode == 0) {
+						alert("删除成功");
+						window.location.href='${base_url}/SledServerAdmin/show';
+					} else {
+						alert(result.errorMsg);
+					}
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+
+	function gotoHostingInfoPage(innerIpAddress) {
+		alert("gotoHostingInfoPage : " + innerIpAddress)
+		if (innerIpAddress != '' && innerIpAddress != undefined && innerIpAddress != null) {
+			window.location.href='${base_url}/SledHostingDebug/show?hostingIP=' + innerIpAddress;
+		}
+	}
+	
+	</script>
+
+</body>
+</html>

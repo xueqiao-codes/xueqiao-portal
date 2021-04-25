@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>映射列表</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+	
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">用户中心</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>用户中心</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<span class="tab_active"><b>公司</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterUserAdmin/show"><span class="tab_inactive"><b>用户</b></span></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/MUserCenterOrderAdmin/show"><span class="tab_inactive"><b>订单</b></span></a>
+			</div>
+		</div>
+		
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+					<div class="sled_align_rifht general_margin_right">
+						<button id="btn-add-company" class="sled_btn_enable">添加</button>
+					</div>
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th width="50">公司ID</th>
+								<th width="50">公司代号</th>
+								<th width="50">公司名称</th>
+								<th width="50">资金规模</th>
+								<th width="50">注册渠道</th>
+								<th width="50">实际地址</th>
+								<th width="50">联系邮箱</th>
+								<th width="50">联系手机</th>
+								<th width="50">服务组</th>
+							</tr>
+						</thead>
+						<tbody>
+							<#if companyList??>
+								<#list companyList as company>
+									<tr>
+										<td>${company.companyId}</td>
+										<td>${company.companyCode!""}</td>
+										<td>${company.companyName!""}</td>
+										<td>${company.fund!""}</td>
+										<td>${company.channel!""}</td>
+										<td>${company.address!""}</td>
+										<td>${company.email!""}</td>
+										<td>${company.telephone!""}</td>
+										<td><a href="${base_url}/MUserCenterServiceGroupAdmin/show?companyId=${company.companyId?c}">查询</a></td>
+									</tr>
+								</#list>
+							</#if>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<#assign basePageNavUrl="${baseQueryUrl!}"/> 
+			<#include "page_nav.html">
+		</div>
+	</div>
+	
+	<div id="add_company_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">公司代号</label>
+			<input class="dialog_input_value" type="text" name="add_company_code" id="add_company_code">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">公司名称</label>
+			<input class="dialog_input_value" type="text" name="add_company_name" id="add_company_name">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">资金规模</label>
+			<input class="dialog_input_value" type="text" name="add_fund" id="add_fund">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">注册渠道</label>
+			<input class="dialog_input_value" type="text" name="add_channel" id="add_channel">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">实际地址</label>
+			<input class="dialog_input_value" type="text" name="add_address" id="add_address">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">联系邮箱</label>
+			<input class="dialog_input_value" type="text" name="add_email" id="add_email">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">联系手机</label>
+			<input class="dialog_input_value" type="text" name="add_telephone" id="add_telephone">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">登录密码</label>
+			<input class="dialog_input_value" type="password" name="add_passwd" id="add_passwd">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">确认密码</label>
+			<input class="dialog_input_value" type="password" name="add_passwd_double" id="add_passwd_double">
+		</fieldset>
+	</div>
+	
+	<script>
+	
+	$("#add_company_dialog").dialog({
+		autoOpen : false,
+		height : 400,
+		width : 460,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var add_company_code = $("#add_company_code").val();
+				var add_company_name = $("#add_company_name").val();
+				var add_fund = $("#add_fund").val();
+				var add_channel = $("#add_channel").val();
+				var add_address = $("#add_address").val();
+				var add_email = $("#add_email").val();
+				var add_telephone = $("#add_telephone").val();
+				var add_passwd = $("#add_passwd").val();
+				var add_passwd_double = $("#add_passwd_double").val();
+				
+				
+				if (add_company_code == null || add_company_code == undefined || add_company_code == '') {
+					alert('请输公司代号');
+					return;
+				}
+				if (add_company_name == null || add_company_name == undefined || add_company_name == '') {
+					alert('请输入公司名称');
+					return;
+				}
+				if (add_fund == null || add_fund == undefined || add_fund == '') {
+					alert('请输资金规模');
+					return;
+				}
+				if (add_channel == null || add_channel == undefined || add_channel == '') {
+					alert('请输入注册渠道');
+					return;
+				}
+				if (add_address == null || add_address == undefined || add_address == '') {
+					alert('请输公司实际 地址');
+					return;
+				}
+				if (add_email == null || add_email == undefined || add_email == '') {
+					alert('请输入联系邮箱');
+					return;
+				}
+				if (add_telephone == null || add_telephone == undefined || add_telephone == '') {
+					alert('请输联系手机号');
+					return;
+				}
+				if (add_passwd == null || add_passwd == undefined || add_passwd == '') {
+					alert('请输入登录密码');
+					return;
+				}
+				if (add_passwd_double == null || add_passwd_double == undefined || add_passwd_double == '') {
+					alert('请输入确认登录密码');
+					return;
+				}
+				if (add_passwd != add_passwd_double) {
+					alert('两次密码不一致，请重新输入');
+					$("#add_passwd").val("");
+					$("#add_passwd_double").val("");
+					return;
+				}
+				
+				addCompany();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#btn-add-company").click(function( event ) {
+		$("#add_company_dialog").dialog("option", "title", "添加公司");
+		$("#add_company_dialog").dialog("open");
+	});
+	
+	function addCompany() {
+		var add_company_code = $("#add_company_code").val();
+		var add_company_name = $("#add_company_name").val();
+		var add_fund = $("#add_fund").val();
+		var add_channel = $("#add_channel").val();
+		var add_address = $("#add_address").val();
+		var add_email = $("#add_email").val();
+		var add_telephone = $("#add_telephone").val();
+		var add_passwd = $("#add_passwd").val();
+		
+		var request = {
+				companyCode : add_company_code,
+				companyName : add_company_name,
+				fund : add_fund,
+				channel : add_channel,
+				address : add_channel,
+				email : add_email,
+				telephone : add_telephone,
+				password : add_passwd,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/MUserCenterCompanyAdmin/addCompany",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/MUserCenterCompanyAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	</script>
+</body>
+</html>

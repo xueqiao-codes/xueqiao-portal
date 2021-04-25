@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>商品详情</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+<link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+
+<style type="text/css">
+.table td{
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+}
+.table th {
+ font-style: normal;
+ font-weight: normal;
+ text-align:center;
+ background:#F8FCFF;
+}
+.bootstrap-table {
+ width: 100%;
+}
+</style>
+
+</head>
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledExchangeAdmin/show">交易所管理</a></span>
+			<span>></span>
+			<span class="navigation_bar_font_link"><a href="${base_url}/SledCommodityAdmin/show?commodityType=${commodityType}&exchangeMic=${exchangeMic}&exchangeCNName=${exchangeCNName}">${exchangeCNName}&nbsp;商品列表&nbsp;<#if (commodityType!"") == "FUTURES">期货</#if><#if (commodityType!"") == "OPTION">期权</#if></a></span>
+			<span>></span>
+			<span class="navigation_bar_font_default">商品详情</span>
+			
+		</div>
+		<div class=" vertical_center">
+			<div class="sled_align_rifht general_margin_right btn_edit_mode">
+				<#if moduleEditable == 1>
+					<a href="javascript:unlockModule();">退出编辑状态并同步</a>
+				<#elseif moduleEditable == 2>
+					<span>${lockModule!""}模块在编辑中</span>
+				<#elseif moduleEditable == 3>
+					<span>${lockUserName}在编辑${lockModule!""}模块</span>
+				<#else>
+					<a href="javascript:lockModule();">进入编辑状态</a>
+				</#if>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>${sledCommodity.sledCommodityCode!""}&nbsp;${sledCommodity.cnName!""}</b></span>
+			</div>
+		</div>
+		
+		<!-- status bar -->
+		<div class="sled_panel status_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left status_bar_font">编辑状态：</span><span class="status_bar_font">${sledCommodity.editStatus!""}</span>
+			</div>
+			<div class=" vertical_center">
+				<div class="sled_align_rifht general_margin_right">
+					<#if moduleEditable == 1>
+						<button class="sled_btn_enable" id="btn-validate">验证</button>
+					<#else>
+						<button class="sled_btn_disable" disabled="disabled" id="btn-validate">验证</button>
+					</#if>
+				</div>
+			</div>
+		</div>
+		
+		<!-- contents container1 -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content 1 -->
+			<div class="sled_panel general_margin_top general_bg_default">
+		
+				<!-- content title bar -->
+				<div class="content_title_bar">
+					<div class=" vertical_center">
+						<span class="general_margin_left">商品详情</span>
+						<div class="sled_align_rifht general_margin_right">
+							<#if moduleEditable == 1>
+								<button id="btn-modify-commodity" class="sled_btn_enable">修改</button>
+							<#else>
+								<button id="btn-modify-commodity" class="sled_btn_disable" disabled="disabled">修改</button>
+							</#if>
+						</div>
+					</div>
+				</div>
+				
+				<!-- table -->
+				<div class="general_bg_default">
+					<div class="list_container">
+						<table class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th class="table_nav_key" width="50">中文名称</th>
+								<th class="table_nav_key" width="50">中文简称</th>
+								<th class="table_nav_key" width="50">英文名称</th>
+								<th class="table_nav_key" width="50">英文简称</th>
+								<th class="table_nav_key" width="50">商品状态</th>
+								<th class="table_nav_key" width="50">商品代码</th>
+								<th class="table_nav_key" width="50">交易币种</th>
+								<th class="table_nav_key" width="80">商品时区</th>
+								<th class="table_nav_key" width="50">合约每手乘数</th>
+								<th class="table_nav_key" width="50">最小变动价位</th>
+								<th class="table_nav_key" width="50">报价分母</th>
+								<th class="table_nav_key" width="150">关联商品</th>
+								<th class="table_nav_key" width="50">组合方向</th>
+							</tr>
+							<tr>
+								<td align="center">${sledCommodity.cnName!""}</td>
+								<td align="center">${sledCommodity.cnAcronym!""}</td>
+								<td align="center">${sledCommodity.engName!""}</td>
+								<td align="center">${sledCommodity.engAcronym!""}</td>
+								<td align="center">${sledCommodity.commodityState!""}</td>
+								<td align="center">${sledCommodity.sledCommodityCode!""}</td>
+								<td align="center">${sledCommodity.tradeCurrency!""}</td>
+								<td align="center">${sledCommodity.timezone!""}</td>
+								<td align="center">${sledCommodity.contractSize}</td>
+								<td align="center">${sledCommodity.tickSizeStr!""}</td>
+								<td align="center">${sledCommodity.denominator}</td>
+								<td align="center">
+									<#if sledCommodity.relateCommodityList??>
+										<#list sledCommodity.relateCommodityList as relateCommodity>
+											${relateCommodity.sledCommodityCode!""}&nbsp;&nbsp;&nbsp;
+										</#list>
+									</#if>
+								</td>
+								<td align="center">${sledCommodity.cmbDirect}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			
+			<!-- content 2 -->
+			<div class="sled_panel general_margin_top general_bg_default general_margin_bottom">
+		
+				<!-- content title bar -->
+				<div class="content_title_bar">
+					<div class=" vertical_center">
+						<span class="general_margin_left">更多信息</span>
+						<div class="sled_align_rifht general_margin_right">
+							<#if moduleEditable == 1>
+								<button id="btn-add-commodity-config" class="sled_btn_enable">添加</button>
+							<#else>
+								<button id="btn-add-commodity-config" class="sled_btn_disable" disabled="disabled">添加</button>
+							</#if>
+						</div>
+					</div>
+				</div>
+				
+				<!-- table -->
+				<div class="general_bg_default">
+					<div class="list_container">
+						<table class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th class="table_nav_key" width="300">详情内容</th>
+								<th class="table_nav_key" width="50">生效开始时间</th>
+								<th class="table_nav_key" width="50">生效结束时间</th>
+								<th class="table_nav_key" width="50">状态</th>
+								<th class="table_nav_key" width="50">操作</th>
+							</tr>
+							<#if sledCommodity.localCommodityConfigList??>
+								<#list sledCommodity.localCommodityConfigList as localCommodityConfig>
+									<tr>
+										<td>
+											<span>单笔最大下单量：</span>${localCommodityConfig.maxSingleOrderVol}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>最大持仓：</span>${localCommodityConfig.maxHoldVol}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>手续费计算方式：</span>${localCommodityConfig.commissionCalculateMode!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>开平手续费计算因子：</span>${localCommodityConfig.openCloseFeeStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>保证金计算方式：</span>${localCommodityConfig.marginCalculateMode!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>初始保证金计算因子：</span>${localCommodityConfig.initialMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>维持保证金计算因子：</span>${localCommodityConfig.maintenanceMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>看空初始保证金计算因子：</span>${localCommodityConfig.sellInitialMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>看空维持保证金计算因子：</span>${localCommodityConfig.sellMaintenanceMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>计量单位：</span>${localCommodityConfig.measureUnit!""}&nbsp;&nbsp;&nbsp;&nbsp;
+											<span>计价单位：</span>${localCommodityConfig.chargeUnit!""}
+										</td>
+										<td align="center">${localCommodityConfig.activeStartTimestamp!""}</td>
+										<td align="center">${localCommodityConfig.activeEndTimestamp!""}</td>
+										<td align="center">${localCommodityConfig.workingStatus!""}</td>
+										
+										<#if moduleEditable == 1>
+											<td align="center"><a href="javascript:deleteCommodityConfig(${localCommodityConfig.configId});"><img src="${static_url}/img/icon_delete.png"/></a></td>
+										<#else>
+											<td align="center"><img src="${static_url}/img/icon_delete_disabled.png"/></td>
+										</#if>
+									</tr>
+								</#list>
+							</#if>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- contents container2 -->
+		
+		<!-- <div class="sled_panel general_margin_top"> -->
+		
+			<div class="sled_panel general_margin_top">
+		
+				<!-- content title bar -->
+				<div class="content_title_bar">
+					<div class=" vertical_center">
+						<span class="general_margin_left">商品映射</span>
+					</div>
+				</div>
+				
+				<!-- table -->
+				<div class="general_bg_default">
+					<div class="list_container">
+						<#if localCommodityMappingInfo??>
+							<table data-toggle="table" class="table table-bordered" style="border: 1px;">
+								<thead>
+									<tr>
+										<th data-colspan="3">雪橇</th>
+										<#if (localCommodityMappingInfo.mappingPlatform!"") == "CTP">
+											<th data-colspan="4">CTP</th>
+										<#elseif (localCommodityMappingInfo.mappingPlatform!"") == "ESUNNY">
+											<th data-colspan="4">易盛9.0</th>
+											<th data-colspan="4">易盛3.0</th>
+										</#if>
+									</tr>
+									<tr>
+										<th width="50">交易所</th>
+										<th width="50">商品类型</th>
+										<th width="50">商品</th>
+										<#if (localCommodityMappingInfo.mappingPlatform!"") == "CTP">
+											<th width="50">交易所</th>
+											<th width="50">商品类型</th>
+											<th width="50">商品</th>
+											<th width="50">价格比例</th>
+										<#elseif (localCommodityMappingInfo.mappingPlatform!"") == "ESUNNY">
+											<th width="50">交易所</th>
+											<th width="50">商品类型</th>
+											<th width="50">商品</th>
+											<th width="50">价格比例</th>
+											
+											<th width="50">交易所</th>
+											<th width="50">商品类型</th>
+											<th width="50">商品</th>
+											<th width="50">价格比例</th>
+										</#if>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>${localCommodityMappingInfo.sledExchangeMic!""}</td>
+										<td>${localCommodityMappingInfo.sledCommodityType!""}</td>
+										<td>${localCommodityMappingInfo.sledCommodityCode!""}</td>
+										
+										<#if (localCommodityMappingInfo.mappingPlatform!"") == "CTP">
+											<td>${localCommodityMappingInfo.ctpExchange!""}</td>
+											<td>${localCommodityMappingInfo.ctpCommodityType!""}</td>
+											<td>${localCommodityMappingInfo.ctpCommodityCode!""}</td>
+											<td>${localCommodityMappingInfo.ctpMoneyRatio!""}</td>
+											
+										<#elseif (localCommodityMappingInfo.mappingPlatform!"") == "ESUNNY">
+											<td>${localCommodityMappingInfo.es9Exchange!""}</td>
+											<td>${localCommodityMappingInfo.es9CommodityType!""}</td>
+											<td>${localCommodityMappingInfo.es9CommodityCode!""}</td>
+											<td>${localCommodityMappingInfo.es9MoneyRatio!""}</td>
+											
+											<td>${localCommodityMappingInfo.es3Exchange!""}</td>
+											<td>${localCommodityMappingInfo.es3CommodityType!""}</td>
+											<td>${localCommodityMappingInfo.es3CommodityCode!""}</td>
+											<td>${localCommodityMappingInfo.es3MoneyRatio!""}</td>
+										</#if>
+									</tr>
+								</tbody>
+							</table>
+						</#if>
+					</div>
+				</div>
+				<div style="height: 20px;"></div>
+			</div>
+		<!-- </div> -->
+		
+		
+		<!-- contents container3 -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content 1 -->
+			<div class="sled_panel general_margin_top general_bg_default">
+		
+				<!-- content title bar -->
+				<div class="content_title_bar">
+					<div class=" vertical_center">
+						<span class="general_margin_left">${techPlatformCommodity.techPlatform!""}&nbsp;商品详情</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<span>交易状态 ： </span>
+						<span>${techPlatformCommodity.commodityState!""}</span>
+					</div>
+				</div>
+				
+				<!-- table -->
+				<div class="general_bg_default">
+					<div class="list_container">
+						<table class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th class="table_nav_key" width="50">商品代码</th>
+								<th class="table_nav_key" width="100">中文名称</th>
+								<th class="table_nav_key" width="100">英文名称</th>
+								<th class="table_nav_key" width="50">交易币种</th>
+								<th class="table_nav_key" width="50">商品时区</th>
+								<th class="table_nav_key" width="50">合约每手乘数</th>
+								<th class="table_nav_key" width="50">最小变动价位</th>
+								<th class="table_nav_key" width="50">报价分母</th>
+								<th class="table_nav_key" width="150">关联商品</th>
+								<th class="table_nav_key" width="50">组合方向</th>
+							</tr>
+							<tr>
+								<td align="center">${techPlatformCommodity.commodityCode!""}</td>
+								<td align="center">${techPlatformCommodity.cnName!""}</td>
+								<td align="center">${techPlatformCommodity.engName!""}</td>
+								<td align="center">${techPlatformCommodity.tradeCurrency!""}</td>
+								<td align="center">${techPlatformCommodity.timezone!""}</td>
+								<td align="center">${techPlatformCommodity.contractSize}</td>
+								<td align="center">${techPlatformCommodity.tickSizeStr!""}</td>
+								<td align="center">${techPlatformCommodity.denominator}</td>
+								<td align="center">
+									<#if techPlatformCommodity.relateCommodityCodes??>
+										<#list techPlatformCommodity.relateCommodityCodes as relateCommodityCode>
+											${relateCommodityCode!""}&nbsp;|&nbsp;
+										</#list>
+									</#if>
+								</td>
+								<td align="center">${techPlatformCommodity.cmbDirect!""}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			
+			<!-- content 2 -->
+			<div class="sled_panel general_margin_top general_bg_default general_margin_bottom">
+		
+				<!-- content title bar -->
+				<div class="content_title_bar">
+					<div class=" vertical_center">
+						<span class="general_margin_left">更多信息</span>
+					</div>
+				</div>
+				
+				<!-- table -->
+				<div class="general_bg_default">
+					<div class="list_container">
+						<table class="table table-bordered" style="border: 1px;">
+							<tr bgColor=#F8FCFF>
+								<th class="table_nav_key" width="150">详情内容</th>
+							</tr>
+							<tr>
+								<td>
+									<span>单笔最大下单量：</span>${techPlatformCommodity.maxSingleOrderVol}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>最大持仓：</span>${techPlatformCommodity.maxHoldVol}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>手续费计算方式：</span>${techPlatformCommodity.commissionCalculateMode!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>开平手续费计算因子：</span>${techPlatformCommodity.openCloseFeeStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>保证金计算方式：</span>${techPlatformCommodity.marginCalculateMode!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>初始保证金计算因子：</span>${techPlatformCommodity.initialMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>维持保证金计算因子：</span>${techPlatformCommodity.maintenanceMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>看空初始保证金计算因子：</span>${techPlatformCommodity.sellInitialMarginStr!""}&nbsp;&nbsp;&nbsp;&nbsp;
+									<span>看空维持保证金计算因子：</span>${techPlatformCommodity.sellMaintenanceMarginStr!""}
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="modify_commodity_state_dialog">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文名称：</label>
+			<input class="dialog_input_value" type="text" name="modify_cn_name" id="modify_cn_name" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">中文简称：</label>
+			<input class="dialog_input_value" type="text" name="modify_cn_acronym" id="modify_cn_acronym" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文名称：</label> <input
+				class="dialog_input_value" type="text" name="modify_eng_name" id="modify_eng_name" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">英文简称：</label> <input
+				class="dialog_input_value" type="text" name="modify_eng_acronym" id="modify_eng_acronym" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">商品状态：</label>
+			<select id="modify_commodity_state" name="modify_commodity_state" class="dialog_input_value">
+				<option value="NONE">NONE</option>
+				<option value="TRADEABLE">TRADEABLE</option>
+				<option value="NO_TRADEABLE">NO_TRADEABLE</option>
+				<option value="CLOSE_ONLY">CLOSE_ONLY</option>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">交易币种：</label> <input
+				class="dialog_input_value" type="text" name="modify_trade_currency" id="modify_trade_currency" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">商品时区：</label>
+			<input class="dialog_input_value" type="text" id="time_zone" name="time_zone" list="time_zone_list" />
+			<#if zoneIdList??>
+				<datalist id="time_zone_list">
+					<#list zoneIdList as zoneId>
+						<option value=${zoneId!""} />
+					</#list>
+				</datalist>
+			</#if>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">合约每手乘数：</label>
+			<input class="dialog_input_value" type="text" name="modify_contract_size" id="modify_contract_size" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">最小变动价位：</label>
+			<input class="dialog_input_value" type="text" name="modify_tick_size" id="modify_tick_size" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">报价分母：</label>
+			<input class="dialog_input_value" type="text" name="modify_denominator" id="modify_denominator" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">组合方向：</label>
+			<select class="dialog_input_value" id="modify_cmb_direct" name="modify_cmb_direct">
+				<option value="NONE">NONE</option>
+				<option value="FIRST">FIRST</option>
+				<option value="SECOND">SECOND</option>
+			</select>
+		</fieldset>
+	</div>
+	
+	<div id="add_commodity_config_dialog">
+		<input type="hidden" name="modify_sled_commodity_id" id="modify_sled_commodity_id" value=${sledCommodity.sledCommodityId}>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">单笔最大下单量</label> <input
+				class="dialog_input_value" type="text" name="add_max_single_order_vol" id="add_max_single_order_vol" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">最大持仓</label> <input
+				class="dialog_input_value" type="text" name="add_max_hold_vol" id="add_max_hold_vol" >
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">交割日偏移</label> <input
+				class="dialog_input_value" type="text" name="add_delivery_days" id="add_delivery_days" >
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">交割行权方式</label>
+			<select id="add_delivery_mode" name="add_delivery_mode" class="dialog_input_value">
+				<option value="NONE">NONE</option>
+				<option value="GOODS">GOODS</option>
+				<option value="CASH">CASH</option>
+				<option value="EXECUTE">EXECUTE</option>
+				<option value="ABANDON">ABANDON</option>
+				<option value="HKF">HKF</option>
+			</select>
+		</fieldset>
+
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">手续费计算方式</label> 
+			<select id="add_commission_calculate_mode" name="add_commission_calculate_mode" class="dialog_input_value">
+				<option value="COMBINE">COMBINE</option>
+				<option value="PERCENTAGE">PERCENTAGE</option>
+				<option value="QUOTA">QUOTA</option>
+				<option value="CHAPERCENTAGE">CHAPERCENTAGE</option>
+				<option value="CHAQUOTA">CHAQUOTA</option>
+				<option value="DISCOUNT">DISCOUNT</option>
+			</select>
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">保证金计算方式</label> 
+			<select id="add_margin_calculate_mode" name="add_margin_calculate_mode" class="dialog_input_value">
+				<option value="COMBINE">COMBINE</option>
+				<option value="PERCENTAGE">PERCENTAGE</option>
+				<option value="QUOTA">QUOTA</option>
+				<option value="CHAPERCENTAGE">CHAPERCENTAGE</option>
+				<option value="CHAQUOTA">CHAQUOTA</option>
+				<option value="DISCOUNT">DISCOUNT</option>
+			</select>
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">开平手续费计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_open_close_fee" id="add_open_close_fee" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">初始保证金计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_initial_margin" id="add_initial_margin" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">维持保证金计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_maintenance_margin" id="add_maintenance_margin" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">看空初始保证金计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_sell_initial_margin" id="add_sell_initial_margin" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">看空维持保证金计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_sell_maintenance_margin" id="add_sell_maintenance_margin" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">锁仓保证金计算因子</label> <input
+				class="dialog_input_value" type="text" name="add_lock_margin" id="add_lock_margin" >
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">生效起始日期</label> <input
+				class="dialog_input_value" type="date" name="add_active_start_timestamp" id="add_active_start_timestamp" >
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">生效结束日期</label> <input
+				class="dialog_input_value" type="date" name="add_active_end_timestamp" id="add_active_end_timestamp" >
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">计量单位</label>
+			<input class="dialog_input_value" type="text" name="add_measure_unit" id="add_measure_unit" list="list_measure_units">
+			<datalist id="list_measure_units">
+				<option value="克" />
+				<option value="千克" />
+				<option value="吨" />
+				<option value="盎司" />
+				<option value="磅" />
+				<option value="蒲式耳" />
+				<option value="加仑" />
+				<option value="桶" />
+				<option value="升" />
+				<option value="指数点" />
+			</datalist>
+		</fieldset>
+		
+		<fieldset>
+			<label class="dialog_input_key_long" for="field_file" style="width: 180px;text-align: right;">计价单位</label> <input
+				class="dialog_input_value" type="text" name="add_charge_unit" id="add_charge_unit" >
+		</fieldset>
+	</div>
+
+	<script>
+
+	$("#btn_sync_commodity_config").click(function( event ) {
+		syncCommodityConfig();
+	});
+	
+	$("#btn-modify-commodity").click(function( event ) {
+		showModifyCommodityStateDialog();
+	});
+	
+	$("#btn-add-commodity-config").click(function( event ) {
+		showAddCommodityConfigDialog();
+	});
+	
+	$("#btn-validate").click(function( event) {
+		verifySledCommodity();
+	});
+	
+	$("#modify_commodity_state_dialog").dialog({
+		autoOpen : false,
+		height : 350,
+		width : 450,
+		modal : true,
+		buttons : {
+			"保存" : function() {
+				
+				var modify_commodity_cn_name = $("#modify_cn_name").val();
+				var modify_commodity_eng_name = $("#modify_eng_name").val();
+
+				var modify_commodity_cn_acronym = $("#modify_cn_acronym").val();
+				var modify_commodity_eng_acronym = $("#modify_eng_acronym").val();
+				
+				if (modify_commodity_cn_name == null || modify_commodity_cn_name == undefined || modify_commodity_cn_name == '') {
+					alert('请输入中文名称');
+					return;
+				}
+				if (modify_commodity_eng_name == null || modify_commodity_eng_name == undefined || modify_commodity_eng_name == '') {
+					alert('请输入英文名称');
+					return;
+				}
+
+				if (modify_commodity_cn_acronym == null || modify_commodity_cn_acronym == undefined || modify_commodity_cn_acronym == '') {
+					alert('请输入中文简称');
+					return;
+				}
+				if (modify_commodity_eng_acronym == null || modify_commodity_eng_acronym == undefined || modify_commodity_eng_acronym == '') {
+					alert('请输入英文简称');
+					return;
+				}
+
+				var that = this;
+
+				modifySledCommodityState(function () {
+					$(that).dialog("close");
+				});
+				<!--$(this).dialog("close");-->
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+$("#add_commodity_config_dialog").dialog({
+	autoOpen : false,
+	height : 550,
+	width : 550,
+	modal : true,
+	buttons : {
+		"确认" : function() {
+			
+			var add_max_single_order_vol = $("#add_max_single_order_vol").val();
+			var add_delivery_days = $("#add_delivery_days").val();
+			var add_max_hold_vol = $("#add_max_hold_vol").val();
+			var add_open_close_fee = $("#add_open_close_fee").val();
+			
+			var add_initial_margin = $("#add_initial_margin").val();
+			var add_maintenance_margin = $("#add_maintenance_margin").val();
+			var add_sell_initial_margin = $("#add_sell_initial_margin").val();
+			var add_sell_maintenance_margin = $("#add_sell_maintenance_margin").val();
+			var add_lock_margin = $("#add_lock_margin").val();
+			
+			var add_active_start_timestamp = $("#add_active_start_timestamp").val();
+			var add_active_end_timestamp = $("#add_active_end_timestamp").val();
+			
+			var add_measure_unit = $("#add_measure_unit").val();
+			var add_charge_unit = $("#add_charge_unit").val();
+			
+			if (add_max_single_order_vol == null || add_max_single_order_vol == undefined || add_max_single_order_vol == '') {
+				alert('请输入单笔最大下单量');
+				return;
+			}
+			if (add_delivery_days == null || add_delivery_days == undefined || add_delivery_days == '') {
+				alert('请输入交割日偏移');
+				return;
+			}
+			if (add_max_hold_vol == null || add_max_hold_vol == undefined || add_max_hold_vol == '') {
+				alert('请输入最大持仓');
+				return;
+			}
+			if (add_open_close_fee == null || add_open_close_fee == undefined || add_open_close_fee == '') {
+				alert('请输入平开手续费计算因子');
+				return;
+			}
+			if (add_initial_margin == null || add_initial_margin == undefined || add_initial_margin == '') {
+				alert('请输入初始保证金计算因子');
+				return;
+			}
+			if (add_maintenance_margin == null || add_maintenance_margin == undefined || add_maintenance_margin == '') {
+				alert('请输入维持保证金计算因子');
+				return;
+			}
+			if (add_sell_initial_margin == null || add_sell_initial_margin == undefined || add_sell_initial_margin == '') {
+				alert('请输入看空初始保证金计算因子');
+				return;
+			}
+			if (add_sell_maintenance_margin == null || add_sell_maintenance_margin == undefined || add_sell_maintenance_margin == '') {
+				alert('请输入看空维持保证金计算因子');
+				return;
+			}
+			if (add_lock_margin == null || add_lock_margin == undefined || add_lock_margin == '') {
+				alert('请输入锁仓保证金计算因子');
+				return;
+			}
+			
+			if (add_active_start_timestamp == null || add_active_start_timestamp == undefined || add_active_start_timestamp == '') {
+				alert('请输入生效起始日期');
+				return;
+			}
+			if (add_active_end_timestamp == null || add_active_end_timestamp == undefined || add_active_end_timestamp == '') {
+				alert('请输入生效结束日期');
+				return;
+			}
+			
+			if (add_measure_unit == null || add_measure_unit == undefined || add_measure_unit == '') {
+				alert('请输入计量单位');
+				return;
+			}
+			if (add_charge_unit == null || add_charge_unit == undefined || add_charge_unit == '') {
+				alert('请输入计价单位');
+				return;
+			}
+			
+			addSledCommodityConfig();
+			
+			$(this).dialog("close");
+		},
+		"取消" : function() {
+			$(this).dialog("close");
+		}
+	}
+});
+
+/* $("#btn-modify-commodity").click(function( event ) {
+	$("#modify_commodity_dialog").dialog("option", "title", "编辑");
+	$("#modify_commodity_dialog").dialog("open");
+
+	//event.preventDefault();
+}); */
+
+function showModifyCommodityStateDialog() {
+	$("#modify_cn_name").val("${sledCommodity.cnName!""}");
+	$("#modify_eng_name").val("${sledCommodity.engName!""}");
+
+	$("#modify_cn_acronym").val("${sledCommodity.cnAcronym!""}");
+	$("#modify_eng_acronym").val("${sledCommodity.engAcronym!""}");
+
+	$("#modify_commodity_state").val("${sledCommodity.commodityState!""}");
+	$("#modify_trade_currency").val("${sledCommodity.tradeCurrency!""}");
+	$("#time_zone").val("${sledCommodity.timezone!""}");
+	
+	$("#modify_contract_size").val("${sledCommodity.contractSize?c}");
+	$("#modify_tick_size").val("${sledCommodity.tickSizeStr!""}");
+	$("#modify_denominator").val("${sledCommodity.denominator?c}");
+	$("#modify_cmb_direct").val("${sledCommodity.cmbDirect!""}");
+	
+	$("#modify_commodity_state_dialog").dialog("option", "title", "修改商品信息");
+	$("#modify_commodity_state_dialog").dialog("open");
+}
+
+function showAddCommodityConfigDialog() {
+
+	$("#add_max_single_order_vol").val(${localCommodityConfig.maxSingleOrderVol?c});
+	$("#add_delivery_days").val(${localCommodityConfig.deliveryDays?c});
+	$("#add_max_hold_vol").val(${localCommodityConfig.maxHoldVol?c});
+	$("#add_open_close_fee").val('${localCommodityConfig.openCloseFeeStr!""}');
+
+	$("#add_initial_margin").val('${localCommodityConfig.initialMarginStr!""}');
+	$("#add_maintenance_margin").val('${localCommodityConfig.maintenanceMarginStr!""}');
+	$("#add_sell_initial_margin").val('${localCommodityConfig.sellInitialMarginStr!""}');
+	$("#add_sell_maintenance_margin").val('${localCommodityConfig.sellMaintenanceMarginStr!""}');
+	$("#add_lock_margin").val('${localCommodityConfig.lockMarginStr!""}');
+
+	$("#add_active_start_timestamp").val('${localCommodityConfig.activeStartTimestamp!""}');
+	$("#add_active_end_timestamp").val('${localCommodityConfig.activeEndTimestamp!""}');
+
+	$("#add_measure_unit").val('${localCommodityConfig.measureUnit!""}');
+	$("#add_charge_unit").val('${localCommodityConfig.chargeUnit!""}');
+
+	$("#add_delivery_mode").val('${localCommodityConfig.deliveryMode!""}');
+	$("#add_commission_calculate_mode").val('${localCommodityConfig.commissionCalculateMode!""}');
+	$("#add_margin_calculate_mode").val('${localCommodityConfig.marginCalculateMode!""}');
+
+	$("#add_commodity_config_dialog").dialog("option", "title", "添加");
+	$("#add_commodity_config_dialog").dialog("open");
+}
+
+function modifySledCommodityState(funcCloseDialog) {
+	var modify_commodity_state = $("#modify_commodity_state").val();
+	var modify_commodity_cn_name = $("#modify_cn_name").val();
+	var modify_commodity_eng_name = $("#modify_eng_name").val();
+
+	var modify_commodity_cn_acronym = $("#modify_cn_acronym").val();
+	var modify_commodity_eng_acronym = $("#modify_eng_acronym").val();
+
+	var time_zone = $("#time_zone").val();
+	
+	var modify_trade_currency = $("#modify_trade_currency").val();
+	var modify_contract_size = $("#modify_contract_size").val();
+	var modify_tick_size = $("#modify_tick_size").val();
+	var modify_denominator = $("#modify_denominator").val();
+	var modify_cmb_direct = $("#modify_cmb_direct").val();
+	
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledCommodityDetail/updateSledCommodityState",
+		data : {
+			sledCommodityId : ${sledCommodity.sledCommodityId?c},
+			commodityState : modify_commodity_state,
+			cnName : modify_commodity_cn_name,
+			engName : modify_commodity_eng_name,
+			cnAcronym : modify_commodity_cn_acronym,
+			engAcronym : modify_commodity_eng_acronym,
+			zoneId : time_zone,
+			tradeCurrency : modify_trade_currency,
+			contractSize : modify_contract_size,
+			tickSize : modify_tick_size,
+			denominator : modify_denominator,
+			cmbDirect : modify_cmb_direct,
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			if (result.errorCode == 0) {
+				funcCloseDialog();
+				alert("修改成功");
+				window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+			} else {
+				alert(result.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+function addSledCommodityConfig() {
+	
+	var add_max_single_order_vol = $("#add_max_single_order_vol").val();
+	var add_max_hold_vol = $("#add_max_hold_vol").val();
+	var add_open_close_fee = $("#add_open_close_fee").val();
+	
+	var add_initial_margin = $("#add_initial_margin").val();
+	var add_maintenance_margin = $("#add_maintenance_margin").val();
+	var add_sell_initial_margin = $("#add_sell_initial_margin").val();
+	var add_sell_maintenance_margin = $("#add_sell_maintenance_margin").val();
+	
+	var add_commission_calculate_mode = $("#add_commission_calculate_mode").val();
+	var add_margin_calculate_mode = $("#add_margin_calculate_mode").val();
+	var add_lock_margin = $("#add_lock_margin").val();
+	
+	var add_delivery_days = $("#add_delivery_days").val();
+	var add_delivery_mode = $("#add_delivery_mode").val();
+	
+	
+	var add_active_start_timestamp = $("#add_active_start_timestamp").val();
+	var add_active_end_timestamp = $("#add_active_end_timestamp").val();
+	
+	var add_measure_unit = $("#add_measure_unit").val();
+	var add_charge_unit = $("#add_charge_unit").val();
+	
+	
+	var request = {
+			sledCommodityId : ${sledCommodity.sledCommodityId?c},
+			maxSingleOrderVol : add_max_single_order_vol,
+			maxHoldVol : add_max_hold_vol,
+			openCloseFee : add_open_close_fee,
+			
+			initialMargin : add_initial_margin,
+			maintenanceMargin : add_maintenance_margin,
+			sellInitialMargin : add_sell_initial_margin,
+			sellMaintenanceMargin : add_sell_maintenance_margin,
+			lockMargin : add_lock_margin,
+			
+			commissionCalculateMode : add_commission_calculate_mode,
+			marginCalculateMode : add_margin_calculate_mode,
+			
+			deliveryDays : add_delivery_days,
+			deliveryMode : add_delivery_mode,
+			
+			activeStartTimestamp : add_active_start_timestamp,
+			activeEndTimestamp : add_active_end_timestamp,
+			
+			measureUnit : add_measure_unit,
+			chargeUnit : add_charge_unit,
+		};
+	
+	$.ajax({
+		type : "POST",
+		url : "${base_url}/SledCommodityDetail/addSledCommodityConfig",
+		data : JSON.stringify(request),
+		contentType : "application/json",
+		dataType : "json",
+		timeout : 60000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(data) {
+			if (data.errorCode == 0) {
+				alert("添加成功");
+				window.location.href=window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+			} else {
+				alert(data.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+	
+}
+
+function deleteCommodityConfig(configId) {
+	if (confirm("确认删除？")) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledCommodityDetail/deleteSledCommodityConfig",
+			data : {
+				sledCommodityId : ${sledCommodity.sledCommodityId?c},
+				configId : configId,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("删除成功");
+					window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+}
+
+function syncCommodityConfig() {
+	if (confirm("确认同步？")) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledCommodityDetail/synceSledCommodityConfig",
+			data : {
+				sledCommodityId : ${sledCommodity.sledCommodityId?c},
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("同步成功");
+					window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+}
+
+function verifySledCommodity() {
+	if (confirm("确认验证？")) {
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledCommodityDetail/verifySledCommodity",
+			data : {
+				sledCommodityId : ${sledCommodity.sledCommodityId?c},
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				if (result.errorCode == 0) {
+					alert("验证成功");
+					window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+				} else {
+					alert(result.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+}
+
+function unlockModule() {
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledCommodityDetail/unlockModuleContract",
+		data : {
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			if (result.errorCode == 0) {
+				alert("退出编辑状态");
+				window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+			} else {
+				alert(result.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+function lockModule() {
+	$.ajax({
+		type : "POST",
+		dataType : "json",
+		url : "${base_url}/SledCommodityDetail/lockModuleContract",
+		data : {
+		},
+		timeout : 3000,
+		async : false,
+		error : function(request, textStatus, errorThrown) {
+			if (request.status >= 500) {
+				alert('服务器繁忙，请重试');
+			} else if (request.status != 0) {
+				alert('连接服务器失败, 请检查网络');
+			}
+		},
+		success : function(result) {
+			if (result.errorCode == 0) {
+				alert("进入编辑状态");
+				window.location.href='${base_url}/SledCommodityDetail/show?sledCommodityId=${sledCommodity.sledCommodityId?c}&exchangeMic=${exchangeMic}&commodityType=${commodityType}&exchangeCNName=${exchangeCNName}';
+			} else {
+				alert(result.errorMsg);
+			}
+		},
+		complete : function(data) {
+		}
+	});
+}
+
+</script>
+
+	<script type="text/javascript">
+
+$(document).ready(function() {
+	
+}
+
+</script>
+
+</body>
+</html>

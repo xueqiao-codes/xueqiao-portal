@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>合约信息接入管理</title>
+<link rel="stylesheet" href="${static_url}/css/bootstrap.min.css" />
+<link rel="stylesheet" href="${static_url}/css/jquery-ui.min.css" />
+<link rel="stylesheet" href="${static_url}/css/sled.custom.css" />
+
+<script type="text/javascript" src="${static_url}/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="${static_url}/js/jquery-ui.min.js"></script>
+
+<style type="text/css">
+.table_word_break{
+	word-break: break-all;
+}
+</style>
+
+</head>
+
+<body>
+
+	<!-- navigation bar -->
+	<div class="navigation_bar">
+		<div class="vertical_center">
+			<span class="general_margin_left navigation_bar_font_default">当前位置:</span>
+			<span class="navigation_bar_font_default">合约信息接入管理</span>
+		</div>
+	</div>
+	
+	<div class="col-md-12 general_margin_top">
+	
+		<!-- title bar -->
+		<div class="sled_panel title_bar">
+			<div class="vertical_center">
+				<span class="general_margin_left title_font"><b>合约信息接入管理</b></span>
+				<span style="margin-left: 100px;">&nbsp;</span>
+				<span class="tab_active"><b>接入账号</b></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="${base_url}/SledCommoditySourceAdmin/show"><span class="tab_inactive"><b>信息来源</b></span></a>
+			</div>
+		</div>
+	
+		<!-- content container -->
+		<div class="sled_panel general_margin_top">
+		
+			<!-- content title bar -->
+			<div class="content_title_bar">
+				<div class=" vertical_center">
+				</div>
+			</div>
+			
+			<!-- table -->
+			<div class="general_bg_default">
+				<div class="list_container">
+					<table class="table table-bordered" style="border: 1px; table-layout:fixed;">
+						<tr bgColor=#F8FCFF>
+							<th class="table_nav_key" width="50">平台</th>
+							<th class="table_nav_key" width="50">券商</th>
+							<th class="table_nav_key" width="50">席位</th>
+							<th class="table_nav_key" width="50">账号</th>
+							<th class="table_nav_key" width="50">IP</th>
+							<th class="table_nav_key" width="200">附加信息</th>
+							<th class="table_nav_key" width="50">状态</th>
+							<th class="table_nav_key" width="50">设置账号</th>
+						</tr>
+						<#if sledCommoditySourceAccountList??>
+							<#list sledCommoditySourceAccountList as sledCommoditySourceAccount>
+								<tr>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.techPlatform!""}(${sledCommoditySourceAccount.techPlatformEnv!""})</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.brokerEntry!""}</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.brokerAccess!""}</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.accountName!""}</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.ipAddress!""}</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.extraInfo!""}</td>
+									<td class="table_word_break" align="center">${sledCommoditySourceAccount.accessState!""}</td>
+									<td class="table_word_break" align="center"><a href="javascript:showSourceAccountDialog(${sledCommoditySourceAccount.accountId?c}, '${sledCommoditySourceAccount.techPlatform}','${sledCommoditySourceAccount.techPlatformEnv}');">设置</a></td>
+								</tr>
+							</#list>
+						</#if>
+					</table>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+	<!-- dialog -->
+	<div id="update_es_source_account_dialog">
+		<input type="hidden" name="update_es_accountId" id="update_es_accountId">
+		<input type="hidden" name="update_es_platform" id="update_es_platform">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">平台</label> <input
+				class="dialog_input_value_readonly" type="text" name="update_es_platform_label" id="update_es_platform_label" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">券商</label>
+			<select name="update_es_broker" id="update_es_broker" class="selectpicker dialog_input_value">
+				<#if esBrokerList??>
+					<#list esBrokerList as esBroker>
+						<option value="${esBroker.brokerId?c}">${esBroker.cnName!""}</option>
+					</#list>
+				</#if>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">账号</label> <input
+				class="dialog_input_value" type="text" name="update_es_account"
+				id="update_es_account" value="">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">密码</label> <input
+				class="dialog_input_value" type="password" name="update_es_passwd"
+				id="update_es_passwd" value="">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">APPID</label> <input
+				class="dialog_input_value" type="text" name="update_es_appid"
+				id="update_es_appid">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">CER</label> <input
+				class="dialog_input_value" type="text" name="update_es_cer"
+				id="update_es_cer">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">IP</label> <input
+				class="dialog_input_value" type="text" name="update_es_ip"
+				id="update_es_ip">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">端口</label> <input
+				class="dialog_input_value" type="text" name="update_es_port"
+				id="update_es_port" onKeyUp="this.value=this.value.replace(/\D/g,'');">
+		</fieldset>
+	</div>
+	
+	<div id="update_ctp_source_account_dialog">
+		<input type="hidden" name="update_ctp_accountId" id="update_ctp_accountId">
+		<input type="hidden" name="update_ctp_platform" id="update_ctp_platform">
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">平台</label> <input
+				class="dialog_input_value_readonly" type="text" name="update_ctp_platform_label" id="update_ctp_platform_label" readonly="true">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">券商</label>
+			<select name="update_ctp_broker" id="update_ctp_broker" class="selectpicker dialog_input_value" onchange="onCTPBrokerChange(this.value)">
+				<#if ctpBrokerList??>
+					<#list ctpBrokerList as ctpBroker>
+						<option value="${ctpBroker.brokerId?c}">${ctpBroker.cnName!""}</option>
+					</#list>
+				</#if>
+			</select>
+		</fieldset>
+		<fieldset id="ctpBrokerAccessList">
+			<label class="dialog_input_key" for="field_file">席位</label>
+			<select name="update_ctp_broker_access" id="update_ctp_broker_access" class="selectpicker dialog_input_value">
+				<#if ctpBrokerAccessList??>
+					<#list ctpBrokerAccessList as ctpBrokerAccess>
+						<option value="${ctpBrokerAccess.brokerId?c}">${ctpBrokerAccess.cnName!""}</option>
+					</#list>
+				</#if>
+			</select>
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">账号</label> <input
+				class="dialog_input_value" type="text" name="update_ctp_account"
+				id="update_ctp_account" value="">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">密码</label> <input
+				class="dialog_input_value" type="password" name="update_ctp_passwd"
+				id="update_ctp_passwd" value="">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">APPID</label> <input
+				class="dialog_input_value" type="text" name="update_ctp_appid"
+				id="update_ctp_appid">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">CER</label> <input
+				class="dialog_input_value" type="text" name="update_ctp_cer"
+				id="update_ctp_cer">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">IP</label> <input
+				class="dialog_input_value" type="text" name="update_ctp_ip"
+				id="update_ctp_ip">
+		</fieldset>
+		<fieldset>
+			<label class="dialog_input_key" for="field_file">端口</label> <input
+				class="dialog_input_value" type="text" name="update_ctp_port"
+				id="update_ctp_port" onKeyUp="this.value=this.value.replace(/\D/g,'');">
+		</fieldset>
+	</div>
+	
+	<script>
+	$("#update_es_source_account_dialog").dialog({
+		autoOpen : false,
+		height : 350,
+		width : 500,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var update_es_accountId = $("#update_es_accountId").val();
+				var update_es_broker = $("#update_es_broker").val();
+				
+				var update_es_account = $("#update_es_account").val();
+				var update_es_passwd = $("#update_es_passwd").val();
+				
+				var update_es_appid = $("#update_es_appid").val();
+				var update_es_cer = $("#update_es_cer").val();
+				
+				var update_es_ip = $("#update_es_ip").val();
+				var update_es_port = $("#update_es_port").val();
+				
+				if (update_es_broker == null || update_es_broker == undefined || update_es_broker == '') {
+					alert('获取不到券商，请检查后再提交');
+					return;
+				}
+				if (update_es_account == null || update_es_account == undefined || update_es_account == '') {
+					alert('请输入账号');
+					return;
+				}
+				if (update_es_passwd == null || update_es_passwd == undefined || update_es_passwd == '') {
+					alert('请输入密码');
+					return;
+				}
+				if (update_es_appid == null || update_es_appid == undefined || update_es_appid == '') {
+					alert('请输入APPID');
+					return;
+				}
+				if (update_es_cer == null || update_es_cer == undefined || update_es_cer == '') {
+					alert('请输入CER');
+					return;
+				}
+				if (update_es_ip == null || update_es_ip == undefined || update_es_ip == '') {
+					alert('请输入IP');
+					return;
+				}
+				if (update_es_port == null || update_es_port == undefined || update_es_port == '') {
+					alert('请输入端口号');
+					return;
+				}
+				
+				addSourceAccount();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#update_ctp_source_account_dialog").dialog({
+		autoOpen : false,
+		height : 350,
+		width : 500,
+		modal : true,
+		buttons : {
+			"确定" : function() {
+				
+				var update_ctp_accountId = $("#update_ctp_accountId").val();
+				var update_ctp_broker = $("#update_ctp_broker").val();
+				var update_ctp_broker_access = $("#update_ctp_broker_access").val();
+				
+				var update_ctp_account = $("#update_ctp_account").val();
+				var update_ctp_passwd = $("#update_ctp_passwd").val();
+
+				var update_ctp_appid = $("#update_ctp_appid").val();
+				var update_ctp_cer = $("#update_ctp_cer").val();
+				
+				var update_ctp_ip = $("#update_ctp_ip").val();
+				var update_ctp_port = $("#update_ctp_port").val();
+				
+				if (update_ctp_broker == null || update_ctp_broker == undefined || update_ctp_broker == '') {
+					alert('获取不到券商，请检查后再提交');
+					return;
+				}
+				if (update_ctp_broker_access == null || update_ctp_broker_access == undefined || update_ctp_broker_access == '') {
+					alert('获取不到席位，请检查后再提交');
+					return;
+				}
+				if (update_ctp_account == null || update_ctp_account == undefined || update_ctp_account == '') {
+					alert('请输入账号');
+					return;
+				}
+				if (update_ctp_passwd == null || update_ctp_passwd == undefined || update_ctp_passwd == '') {
+					alert('请输入密码');
+					return;
+				}
+				if (update_ctp_appid == null || update_ctp_appid == undefined || update_ctp_appid == '') {
+					alert('请输入APPID');
+					return;
+				}
+				if (update_ctp_cer == null || update_ctp_cer == undefined || update_ctp_cer == '') {
+					alert('请输入CER');
+					return;
+				}
+				if (update_ctp_ip == null || update_ctp_ip == undefined || update_ctp_ip == '') {
+					alert('请输入IP');
+					return;
+				}
+				if (update_ctp_port == null || update_ctp_port == undefined || update_ctp_port == '') {
+					alert('请输入端口号');
+					return;
+				}
+				
+				addCTPSourceAccount();
+				
+				$(this).dialog("close");
+			},
+			"取消" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	function showSourceAccountDialog(accountId, platform, platformEnv) {
+		if (platform == "CTP") {
+			showCTPSourceAccountDialog(accountId, platform, platformEnv);
+		} else {
+			showESSourceAccountDialog(accountId, platform, platformEnv);
+		}
+	}
+	
+	function showESSourceAccountDialog(accountId, platform, platformEnv) {
+		
+		$("#update_es_accountId").val(accountId);
+		$("#update_es_platform_label").val(platform + "(" + platformEnv + ")");
+		$("#update_es_platform").val(platform);
+		
+		$("#update_es_source_account_dialog").dialog("option", "title", "设置接入账号");
+		$("#update_es_source_account_dialog").dialog("open");
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledCommoditySourceAccountAdmin/getSourceAccountInfo",
+			data : {
+				accountId : accountId,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				$("#update_es_broker").val(result.brokerEntryId);
+				$("#update_es_account").val(result.accountName);
+				$("#update_es_passwd").val(result.accountpwd);
+				$("#update_es_appid").val(result.appId);
+				$("#update_es_cer").val(result.cer);
+				$("#update_es_ip").val(result.ipAddress);
+				$("#update_es_port").val(result.port);
+			},
+			complete : function(data) {
+			}
+		});
+		
+	}
+	
+	function showCTPSourceAccountDialog(accountId, platform, platformEnv) {
+		
+		$("#update_ctp_accountId").val(accountId);
+		$("#update_ctp_platform_label").val(platform + "(" + platformEnv + ")");
+		$("#update_ctp_platform").val(platform);
+		
+		
+		$("#update_ctp_source_account_dialog").dialog("option", "title", "设置接入账号");
+		$("#update_ctp_source_account_dialog").dialog("open");
+		
+		$.ajax({
+			type : "POST",
+			dataType : "json",
+			url : "${base_url}/SledCommoditySourceAccountAdmin/getSourceAccountInfo",
+			data : {
+				accountId : accountId,
+			},
+			timeout : 3000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(result) {
+				console.log(result);
+				$("#update_ctp_broker").val(result.brokerEntryId);
+				$("#update_ctp_broker_access").val(result.brokerAccess);
+				$("#update_ctp_account").val(result.accountName);
+				$("#update_ctp_passwd").val(result.accountpwd);
+				$("#update_ctp_appid").val(result.appId);
+				$("#update_ctp_cer").val(result.cer);
+				$("#update_ctp_ip").val(result.ipAddress);
+				$("#update_ctp_port").val(result.port);
+				
+				onCTPBrokerChange(result.brokerEntryId);
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function onSelectionItemClick(event) {
+		var groupExchangeMic = $("[name='exchangeMic']").filter(":checked");
+		var exchangeMic = groupExchangeMic.attr("value");
+		
+		var groupTimezone = $("[name='timezone']").filter(":checked");
+		var timezone = groupTimezone.attr("value");
+		
+		getSpecTradeTimeSelectionInfo(exchangeMic, "", timezone);
+	}
+	
+	function addSourceAccount() {
+		var update_es_accountId = $("#update_es_accountId").val();
+		var update_es_broker = $("#update_es_broker").val();
+		var update_es_account = $("#update_es_account").val();
+		var update_es_passwd = $("#update_es_passwd").val();
+		var update_es_appid = $("#update_es_appid").val();
+		var update_es_cer = $("#update_es_cer").val();
+		var update_es_ip = $("#update_es_ip").val();
+		var update_es_port = $("#update_es_port").val();
+		var update_es_platform = $("#update_es_platform").val();
+		
+		var request = {
+				accountId : update_es_accountId,
+				brokerEntryId : update_es_broker,
+				accountName : update_es_account,
+				accountpwd : update_es_passwd,
+				appId : update_es_appid,
+				cer : update_es_cer,
+				ipAddress : update_es_ip,
+				port : update_es_port,
+				techPlatform : update_es_platform,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledCommoditySourceAccountAdmin/addSourceAccount",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/SledCommoditySourceAccountAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function addCTPSourceAccount() {
+		var update_ctp_accountId = $("#update_ctp_accountId").val();
+		var update_ctp_broker = $("#update_ctp_broker").val();
+		var update_ctp_broker_access = $("#update_ctp_broker_access").val();
+		var update_ctp_account = $("#update_ctp_account").val();
+		var update_ctp_passwd = $("#update_ctp_passwd").val();
+		var update_ctp_appid = $("#update_ctp_appid").val();
+		var update_ctp_cer = $("#update_ctp_cer").val();
+		var update_ctp_ip = $("#update_ctp_ip").val();
+		var update_ctp_port = $("#update_ctp_port").val();
+		var update_ctp_platform = $("#update_ctp_platform").val();
+		
+		var request = {
+				accountId : update_ctp_accountId,
+				brokerEntryId : update_ctp_broker,
+				brokerAccessId : update_ctp_broker_access,
+				accountName : update_ctp_account,
+				accountpwd : update_ctp_passwd,
+				appId : update_ctp_appid,
+				cer : update_ctp_cer,
+				ipAddress : update_ctp_ip,
+				port : update_ctp_port,
+				techPlatform : update_ctp_platform,
+			};
+		
+		$.ajax({
+			type : "POST",
+			url : "${base_url}/SledCommoditySourceAccountAdmin/addSourceAccount",
+			data : JSON.stringify(request),
+			contentType : "application/json",
+			dataType : "json",
+			timeout : 60000,
+			async : false,
+			error : function(request, textStatus, errorThrown) {
+				if (request.status >= 500) {
+					alert('服务器繁忙，请重试');
+				} else if (request.status != 0) {
+					alert('连接服务器失败, 请检查网络');
+				}
+			},
+			success : function(data) {
+				if (data.errorCode == 0) {
+					alert("添加成功");
+					window.location.href='${base_url}/SledCommoditySourceAccountAdmin/show';
+				} else {
+					alert(data.errorMsg);
+				}
+			},
+			complete : function(data) {
+			}
+		});
+	}
+	
+	function onCTPBrokerChange(brokerId) {
+		brokerId = $("#update_ctp_broker").val();
+		//alert(brokerId);
+		if (brokerId > 0) {
+			$.ajax({
+				type : "POST",
+				dataType : "json",
+				url : "${base_url}/SledCommoditySourceAccountAdmin/getCTPBrokerAccessInfo",
+				data : {
+					brokerId : brokerId,
+				},
+				timeout : 3000,
+				async : false,
+				error : function(request, textStatus, errorThrown) {
+					if (request.status >= 500) {
+						alert('服务器繁忙，请重试');
+					} else if (request.status != 0) {
+						alert('连接服务器失败, 请检查网络' + request.status);
+					}
+				},
+				success : function(result) {
+					console.log(result);
+					refreshCTPBrokerAccessDialogContent(result);
+				},
+				complete : function(data) {
+				}
+			});
+		}
+	}
+	
+	function refreshCTPBrokerAccessDialogContent(result) {
+		var ctp_broker_access_content = "";
+		
+		ctp_broker_access_content = "<label class='dialog_input_key' for='field_file'>席位</label>&nbsp;";
+		ctp_broker_access_content = ctp_broker_access_content + "<select name='update_ctp_broker_access' id='update_ctp_broker_access' class='selectpicker dialog_input_value'>";
+		
+		for (index in result) {
+			var ctp_broker_access = result[index];
+			ctp_broker_access_content = ctp_broker_access_content + "<option value='" + ctp_broker_access.entryId + "'>" + ctp_broker_access.accessName + "</option>";
+		}
+		
+		ctp_broker_access_content = ctp_broker_access_content + "</select>";
+		
+		$("#ctpBrokerAccessList").html(ctp_broker_access_content);
+	}
+	</script>
+</body>
+</html>
